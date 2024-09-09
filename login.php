@@ -1,4 +1,45 @@
+<?php
+// require 'db.php';
+// if(!empty($_SESSION["id"])){
+//     header("Location: index.php");
+// }
 
+
+$is_invalid = false;
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+  $mysqli = require __DIR__ . "/db.php";
+
+  $sql = sprintf(
+    "SELECT * FROM users
+                    WHERE email = '%s'",
+    $mysqli->real_escape_string($_POST["email"])
+  );
+
+  $result = $mysqli->query($sql);
+
+  $users = $result->fetch_assoc();
+
+  if ($users) {
+
+    if (password_verify($_POST["password"], $users["password_hash"])) {
+
+      session_start();
+
+      session_regenerate_id();
+
+      $_SESSION["user_id"] = $users["id"];
+
+      header("Location: index.html");
+      exit;
+    }
+  }
+
+  $is_invalid = true;
+}
+
+?>
 
 
 
@@ -25,14 +66,21 @@
                                 <div class="card shadow-lg border-0 rounded-lg mt-5 bg-dark">
                                     <div class="card-header"><h3 class="text-center font-weight-muted my-4 text-light">Login</h3></div>
                                     <div class="card-body">
-                                        <form>
+
+                                        <form class="" action="" method="post" autocomplete="off"><?php if ($is_invalid): ?>
+                                            <em>Invalid login</em>
                                             <div class="form-floating mb-3">
-                                                <input class="form-control text-dark" id="inputEmail" type="email" placeholder="name@example.com" />
-                                                <label for="inputEmail">Email address</label>
+                                                 <label for="email"></label>
+                                                 <?php endif; ?>
+                                                <input class="form-control text-dark" id="email" type="email" name="email" placeholder="name@example.com" />
+                                                value="<?= htmlspecialchars($_POST["email"] ?? "") ?>">
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input class="form-control text-dark" id="inputPassword" type="password" placeholder="Password" />
+                                                <input class="form-control text-dark" id="password" name="password" type="password" placeholder="Password" />
                                                 <label for="inputPassword">Password</label>
+
+
+
                                             </div>
                                             <div class="form-check mb-3 text-muted">
                                                 <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
@@ -45,7 +93,7 @@
                                         </form>
                                     </div>
                                     <div class="card-footer text-center py-3">
-                                        <div class="small text-"><a href="register.html" class="text-muted">Need an account? Sign up!</a></div>
+                                        <div class="small text-"><a href="register.php" class="text-muted">Need an account? Sign up!</a></div>
                                     </div>
                                 </div>
                             </div>

@@ -45,29 +45,7 @@ $stmt->bind_param(
 );
 
 
-// try {
-//     if ($stmt->execute()) {
-//        header("Location: signup-success.html");
-//     exit;
-//     } else {
-//         // Check for duplicate entry
-//         if ($mysqli->errno === 1062) {
-//             echo "Email already taken.";
-//         } else {
-//             echo "Error: " . $mysqli->error . " (" . $mysqli->errno . ")";
-//         }
-//     }
-// } catch (mysqli_sql_exception $e) {
-//     // Catch and handle SQL exceptions
-//     if ($e->getCode() === 1062) {
-//         echo "Email already taken.";
-//     } else {
-//         echo "Error: " . $e->getMessage();
-//     }
-// }
 
-// $stmt->close();
-// $mysqli->close();
 
 if ($stmt->execute()) {
 
