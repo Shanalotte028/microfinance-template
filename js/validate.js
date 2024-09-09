@@ -1,11 +1,16 @@
-const validation = new JustValidate("#signup");
+const validation = new JustValidate("#signups");
 
 validation
-    .addField("#name", [
+    .addField("#fName", [
         {
             rule: "required"
         }
     ])
+    .addField("#lName", [
+      {
+          rule: "required"
+      }
+  ])
     .addField("#email",  [
         {
             rule: "required"
