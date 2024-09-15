@@ -1,36 +1,72 @@
 <?php
 
+// $password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+// $mysqli = require __DIR__ . "/db.php";
+
+// $sql = "INSERT INTO users (fName, lName, email, password_hash)
+//         VALUES (?, ?, ?, ?)";
+
+// $stmt = $mysqli->stmt_init();
+
+// if (! $stmt->prepare($sql)) {
+//     die("SQL error: " . $mysqli->error);
+// }
+
+// $stmt->bind_param(
+//     "ssss",
+//     $_POST["fName"],
+//     $_POST["lName"],
+//     $_POST["email"],
+//     $password_hash
+// );
+
+// if ($stmt->execute()) {
+//     // Instead of redirecting, echo a message with a link to the login page
+//     echo "<script>
+//         alert('Registration successful! You will now be redirected to the login page.');
+//         window.location.href = 'login.html'; // Redirect to login page
+//     </script>";
+// } else {
+//     // Handle errors in case the insert fails
+//     echo "<p>Error occurred: " . $stmt->error . "</p>";
+// }
 
 
-$password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+// $password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
-$mysqli = require __DIR__ . "/db.php";
+// $mysqli = require __DIR__ . "/db.php";
 
-$sql = "INSERT INTO users (fName, lName, email, password_hash)
-        VALUES (?, ?, ?, ?)";
+// $sql = "INSERT INTO users (fName, lName, email, password_hash)
+//         VALUES (?, ?, ?, ?)";
 
-$stmt = $mysqli->stmt_init();
+// $stmt = $mysqli->stmt_init();
 
-if (! $stmt->prepare($sql)) {
-    die("SQL error: " . $mysqli->error);
-}
+// if (! $stmt->prepare($sql)) {
+//     die("SQL error: " . $mysqli->error);
+// }
 
-$stmt->bind_param(
-    "ssss",
-    $_POST["fName"],
-    $_POST["lName"],
-    $_POST["email"],
-    $password_hash
-);
+// $stmt->bind_param(
+//     "ssss",
+//     $_POST["fName"],
+//     $_POST["lName"],
+//     $_POST["email"],
+//     $password_hash
+// );
 
 
 
-if ($stmt->execute()) {
 
-header("Location: login-success.html");
+// if ($stmt->execute()) {
 
-            
-}
+// header("Location: login-success.html");
+       
+// }
+
+
+
+
+
 
 // // Check if email exists
 // $query = $mysqli->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
@@ -50,6 +86,9 @@ header("Location: login-success.html");
 //     // Handle the case where email already exists
 //     echo "Email already exists.";
 // }
+
+
+
 
 
 

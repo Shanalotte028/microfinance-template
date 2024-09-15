@@ -1,3 +1,23 @@
+<?php
+session_start();
+require 'db.php';
+
+
+   
+    if(!empty($_SESSION["id"])){
+        $id = $_SESSION["id"];
+        $result = mysqli_query($conn, "SELECT * FROM users WHERE id = $id");
+        $row = mysqli_fetch_assoc($result);
+    }
+    else{
+        header("Location: login.php");
+    }
+
+
+ ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -14,7 +34,7 @@
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+            <a class="navbar-brand ps-3" href="index.php">Start Bootstrap</a>
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
             <!-- Navbar Search-->
@@ -32,7 +52,9 @@
                         <li><a class="dropdown-item text-muted" href="#!">Settings</a></li>
                         <li><a class="dropdown-item text-muted" href="#!">Activity Log</a></li>
                         <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item text-muted" href="login.php">Logout</a></li>
+                        <li><a class="dropdown-item text-muted" href="logout.php">
+                 
+                        Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -43,7 +65,7 @@
                     <div class="sb-sidenav-menu">
                         <div class="nav">
                             <div class="sb-sidenav-menu-heading">Core</div>
-                            <a class="nav-link" href="index.html">
+                            <a class="nav-link" href="index.php">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Dashboard
                             </a>
@@ -102,7 +124,7 @@
                     </div>
                     <div class="sb-sidenav-footer bg-dark">
                         <div class="small">Logged in as:</div>
-                        Start Bootstrap
+                        
                     </div>
                 </nav>
             </div>
