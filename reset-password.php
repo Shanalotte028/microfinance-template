@@ -1,29 +1,29 @@
 <?php 
 
-$token = $_GET["token"];
+// $token = $_GET["token"];
 
-$token_hash = hash("sha256", $token);
+// $token_hash = hash("sha256", $token);
 
-$conn = require __DIR__ . "/db.php";
+// $conn = require __DIR__ . "/db.php";
 
-$sql = "SELECT * FROM users
-    WHERE reset_token_hash =?";
+// $sql = "SELECT * FROM users
+//     WHERE reset_token_hash =?";
   
-$stmt = $conn->prepare($sql);
+// $stmt = $conn->prepare($sql);
 
-$stmt->bind_param("s", $token_hash);
+// $stmt->bind_param("s", $token_hash);
 
-$stmt->execute();
+// $stmt->execute();
 
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+// $result = $stmt->get_result();
+// $user = $result->fetch_assoc();
 
-if($user == null) {
-  die ("token not found");
-}
-if(strtotime($user["reset_token_expires_at"]) <= time()){
-  die ("Token expired");
-}
+// if($user == null) {
+//   die ("token not found");
+// }
+// if(strtotime($user["reset_token_expires_at"]) <= time()){
+//   die ("Token expired");
+// }
 
 ?>
 
@@ -52,10 +52,19 @@ if(strtotime($user["reset_token_expires_at"]) <= time()){
                                     <div class="card-body">
                                         <div class="small mb-3 text-muted">Enter your email address and we will send you a link to reset your password.</div>
                                         
-                                        <form  method="post" action="process-start-password.php">
+                                        <form  method="post" action="process-reset-password.php">
+
+                                        
+
                                             <div class="form-floating mb-3 info">
-                                                <input class="form-control text-dark" id="email" type="email"  name="email" placeholder="name@example.com" />
-                                                <label for="email">Email address</label>
+                                                <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+
+                                                <input class="form-control text-dark" id="password" type="password" name="password" placeholder="name@example.com" />
+                                                <label for="password">New password</label>
+                                            </div>
+                                            <div class="form-floating mb-3 info">
+                                                <input class="form-control text-dark" id="confirmpassword" type="password" name="confirmpassword" placeholder="name@example.com" />
+                                                <label for="password_confirmation">Repeat Password</label>
                                             </div>
 
                                             <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
@@ -66,8 +75,7 @@ if(strtotime($user["reset_token_expires_at"]) <= time()){
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="card-footer text-center py-3">
-                                        <div class="small"><a href="register.php" class="text-muted">Need an account? Sign up!</a></div>
+                                    
                                     </div>
                                 </div>
                             </div>

@@ -4,14 +4,14 @@ $email = $_POST['email'];
 
 $token = bin2hex(random_bytes(16));
 
-$token_hash =hash("sha256",$token);
+$token_hash = hash("sha256",$token);
 
-$expiry = date("Y-m-d H:i:s", time() + 60 * 30); 
+$expiry = date("Y-m-d H:i:s", time() + 60 * 2); 
 
 $conn = require __DIR__ . "/db.php";
 
 $sql = "UPDATE users
-        SET reset_token_hash =?,
+        SET reset_token_hash = ?,
             reset_token_expires_at = ?
         WHERE email =?";
 
@@ -40,4 +40,7 @@ if ($conn->affected_rows) {
   }
 }
 
-echo "Message sent";
+echo  "<script>
+alert('Message sent to your Email.');
+window.location.href = 'login.php'; // Redirect to login page
+</script>";

@@ -2,65 +2,97 @@
 session_start();
 require 'db.php';
 
-if(!empty($_SESSION["id"])){
+
+if (!empty($_SESSION["id"])) {
     header("Location: index.php");
+    exit();
 }
-if(isset($_POST["submit"])){
+
+if (isset($_POST["submit"])) {
     $fName = $_POST["fName"];
     $lName = $_POST["lName"];
     $email = $_POST["email"];
     $password = $_POST["password"];
     $confirmpassword = $_POST["confirmpassword"];
-    $duplicate = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-    if(mysqli_num_rows($duplicate)> 0){
-        echo "<script> alert('Email already exists!');</script>";
+
+    // Check if the reset token values exist in POST data, otherwise set to NULL
+    $reset_token_hash = isset($_POST["reset_token_hash"]) ? $_POST["reset_token_hash"] : null;
+    $reset_token_expires_at = isset($_POST["reset_token_expires_at"]) ? $_POST["reset_token_expires_at"] : null;
+
+    // Validate input fields (basic validation, you can expand as necessary)
+    if (empty($fName) || empty($lName) || empty($email) || empty($password) || empty($confirmpassword)) {
+        echo "<script>alert('All fields are required!');</script>";
+        exit();
     }
-    else{
-        if($password == $confirmpassword){
-            $query = "INSERT INTO users VALUES ('','$fName','$lName','$email','$password')";
-            mysqli_query($conn, $query);
-            echo 
-            "<script>
-                alert('Registration successful! You will now be redirected to the login page.');
-                window.location.href = 'login.php'; // Redirect to login page
-            </script>";
-        }
-        else{
-            echo "<script> alert('Passwords do not match!');</script>";
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "<script>alert('Invalid email format!');</script>";
+        exit();
+    }
+
+    if ($password !== $confirmpassword) {
+        echo "<script>alert('Passwords do not match!');</script>";
+        exit();
+    }
+
+    // Check for duplicate email using a prepared statement
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo "<script>alert('Email already exists!');</script>";
+    } else {
+        // Insert user data securely without hashing the password
+        $stmt = $conn->prepare("INSERT INTO users (fName, lName, email, password, reset_token_hash, reset_token_expires_at) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $fName, $lName, $email, $password, $reset_token_hash, $reset_token_expires_at);
+
+        if ($stmt->execute()) {
+            echo "<script>
+                    alert('Registration successful! You will now be redirected to the login page.');
+                    window.location.href = 'login.php'; // Redirect to login page
+                  </script>";
+        } else {
+            echo "<script>alert('An error occurred during registration.');</script>";
         }
     }
+
+    $stmt->close(); // Close the statement
 }
+
+
+
 // if(!empty($_SESSION["id"])){
 //     header("Location: index.php");
 // }
-
-// if (isset($_POST["submit"])) {
+// if(isset($_POST["submit"])){
 //     $fName = $_POST["fName"];
 //     $lName = $_POST["lName"];
 //     $email = $_POST["email"];
-//     $password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+//     $password = $_POST["password"];
+//     $reset_token_hash = $_POST["reset_token_hash"];
+//     $$reset_token_expires_at= $_POST["reset_token_expires_at"];
 //     $confirmpassword = $_POST["confirmpassword"];
-    
-//     // Check for duplicate users with the same name and email
-//     $duplicate = mysqli_query($conn, "SELECT * FROM users WHERE fName = '$fName' AND email = '$email'"); 
-    
-//     if (mysqli_num_rows($duplicate) > 0) {
-//         echo "<script> alert('User already exists!');</script>";
-//     } else {
-//         // Check if the hashed password matches the confirmation password
-//         if (password_verify($confirmpassword, $password_hash)) {
-//             $query = "INSERT INTO users VALUES('', '$fName', '$lName', '$email', '$password_hash', '$admin_role')";
+//     $duplicate = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
+//     if(mysqli_num_rows($duplicate)> 0){
+//         echo "<script> alert('Email already exists!');</script>";
+//     }
+//     else{
+//         if($password == $confirmpassword){
+//             $query = "INSERT INTO users VALUES ('','$fName','$lName','$email','$password'";
 //             mysqli_query($conn, $query);
-//             echo "<script>
+//             echo 
+//             "<script>
 //                 alert('Registration successful! You will now be redirected to the login page.');
 //                 window.location.href = 'login.php'; // Redirect to login page
 //             </script>";
-//         } else {
+//         }
+//         else{
 //             echo "<script> alert('Passwords do not match!');</script>";
 //         }
 //     }
 // }
-
 
 // require 'db.php';
 
