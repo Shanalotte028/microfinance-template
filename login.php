@@ -6,83 +6,76 @@ if(!empty($_SESSION["id"])){
     header("Location: index.php");
 } 
 
-
-if(isset($_POST["submit"])){    
+if (isset($_POST["submit"])) {
     $email = $_POST["email"];
     $password = $_POST["password"];
-    $result = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' ");
-    $row = mysqli_fetch_assoc($result);
-    if(mysqli_num_rows($result)> 0){
-        if($password == $row["password"]){
-        $_SESSION["login"] = true;
-        $_SESSION["id"] = $row["id"];
-        header("Location: index.php");
-    }
-    else{
-        echo "<script>alert('Wrong email or password!');</script>";
-    }
-}
-else{
-    echo 
-    "<script>alert('User not registered!');</script>";
+
+    // Use prepared statements to prevent SQL injection
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    // Check if user exists
+    if ($result->num_rows > 0) {
+        // Check if the password matches
+        if ($password == $row["password"]) {
+            // Set session variables
+            $_SESSION["login"] = true;
+            $_SESSION["id"] = $row["id"];
+            $_SESSION["role"] = $row["role"]; // Fetch the role from the DB
+
+            // Check the role and redirect accordingly
+            if ($row["role"] == 1) {
+                echo  "<script>
+                alert('You logged as Admin');
+                window.location.href = 'index.php'; // Redirect to login page
+                </script>";
+            } else {
+                // Role 0 (or any other) for client
+                echo  "<script>
+                alert('Welcome');
+                window.location.href = 'home.php'; // Redirect to login page
+                </script>";
+            }
+            exit(); // Ensure no further code is executed
+        } else {
+            echo "<script>alert('Wrong email or password!');</script>";
+        }
+    } else {
+        echo "<script>alert('User not registered!');</script>";
     }
 }
 
-// if (isset($_POST["id"])) {
+
+
+// if(isset($_POST["submit"])){    
 //     $email = $_POST["email"];
 //     $password = $_POST["password"];
-//     $rememberMe = isset($_POST["rememberMe"]); // Check if the "Remember Me" checkbox is selected
-
-//     // Use prepared statements to prevent SQL injection
-//     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-//     $stmt->bind_param("s", $email);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-
-//     if ($result->num_rows > 0) {
-//         $row = $result->fetch_assoc();
-
-//         // Verify the password
-//         if (password_verify($password, $row["password_hash"])) {
-//             $_SESSION["login"] = true;
-//             $_SESSION["id"] = $row["id"];
-
-//             // If "Remember Me" is checked, set a persistent cookie for 30 days
-//             if ($rememberMe) {
-//                 $cookieValue = base64_encode($row["id"]); // Or generate a secure token
-//                 setcookie("rememberMe", $cookieValue, time() + (86400 * 30), "/"); // Cookie expires in 30 days
-//             }
-
-//             header("Location: index.php");
-//             exit;
-//         } else {
-//             echo "<script>alert('Wrong password!');</script>";
-//         }
-//     } else {
-//         echo "<script>alert('User not registered!');</script>";
-//     }
-    
-//     $stmt->close();
-// }
-
-// // Check if "rememberMe" cookie exists and auto-login
-// if (isset($_COOKIE["rememberMe"])) {
-//     $userId = base64_decode($_COOKIE["rememberMe"]);
-//     // Query the database for the user by ID
-//     $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-//     $stmt->bind_param("i", $userId);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-
-//     if ($result->num_rows > 0) {
-//         $row = $result->fetch_assoc();
+//     $result = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' ");
+//     $row = mysqli_fetch_assoc($result);
+//     if(mysqli_num_rows($result)> 0){
+//         if($password == $row["password"]){
 //         $_SESSION["login"] = true;
 //         $_SESSION["id"] = $row["id"];
+//         $_SESSION["role"] = $role;
 //         header("Location: index.php");
-//         exit;
+//         if($role == 1){
+//             header("Location: home.php");
+//         }
 //     }
-//     $stmt->close();
+//     else{
+//         echo "<script>alert('Wrong email or password!');</script>";
+//     }
 // }
+// else{
+//     echo 
+//     "<script>alert('User not registered!');</script>";
+//     }
+// }
+
+
 
 
 // if (!empty($_SESSION["id"])) {
@@ -168,11 +161,7 @@ else{
                         <input class="form-control text-dark" id="password" name="password" type="password"  required value="" placeholder="Password" />
                         <label for="password">Password</label>
                     </div>
-
-                    
                     <div class="form-check mb-3 text-muted">
-                       
-                       
                     </div>
                     <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
                         <a class="small text-muted" href="password.php">Forgot Password?</a>
