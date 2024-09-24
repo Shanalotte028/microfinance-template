@@ -27,7 +27,7 @@
                                         
                                         <form  method="post" action="send-reset-password.php">
                                             <div class="form-floating mb-3 info">
-                                                <input class="form-control text-dark" id="email" type="email"  name="email" placeholder="name@example.com" />
+                                                <input class="form-control text-dark" id="email" type="email"  name="email" required value="" placeholder="name@example.com" />
                                                 <label for="email">Email address</label>
                                             </div>
 

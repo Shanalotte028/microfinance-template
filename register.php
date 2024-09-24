@@ -2,7 +2,6 @@
 session_start();
 require 'db.php';
 
-
 if (!empty($_SESSION["id"])) {
     header("Location: index.php");
     exit();
@@ -14,6 +13,8 @@ if (isset($_POST["submit"])) {
     $email = $_POST["email"];
     $password = $_POST["password"];
     $confirmpassword = $_POST["confirmpassword"];
+    $reset_token_hash = $_POST["reset_token_hash"];
+    $reset_token_expires_at = $_POST["reset_token_expires_at"];
 
     // Check if the reset token values exist in POST data, otherwise set to NULL
     $reset_token_hash = isset($_POST["reset_token_hash"]) ? $_POST["reset_token_hash"] : null;
@@ -44,9 +45,12 @@ if (isset($_POST["submit"])) {
     if ($result->num_rows > 0) {
         echo "<script>alert('Email already exists!');</script>";
     } else {
-        // Insert user data securely without hashing the password
-        $stmt = $conn->prepare("INSERT INTO users (fName, lName, email, password, reset_token_hash, reset_token_expires_at) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $fName, $lName, $email, $password, $reset_token_hash, $reset_token_expires_at);
+        // Hash the password
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Insert user data securely with the hashed password
+        $stmt = $conn->prepare("INSERT INTO users (fName, lName, email, password_hash, reset_token_hash, reset_token_expires_at) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $fName, $lName, $email, $password_hash, $reset_token_hash, $reset_token_expires_at);
 
         if ($stmt->execute()) {
             echo "<script>
@@ -60,70 +64,9 @@ if (isset($_POST["submit"])) {
 
     $stmt->close(); // Close the statement
 }
+?>
 
 
-
-// if(!empty($_SESSION["id"])){
-//     header("Location: index.php");
-// }
-// if(isset($_POST["submit"])){
-//     $fName = $_POST["fName"];
-//     $lName = $_POST["lName"];
-//     $email = $_POST["email"];
-//     $password = $_POST["password"];
-//     $reset_token_hash = $_POST["reset_token_hash"];
-//     $$reset_token_expires_at= $_POST["reset_token_expires_at"];
-//     $confirmpassword = $_POST["confirmpassword"];
-//     $duplicate = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-//     if(mysqli_num_rows($duplicate)> 0){
-//         echo "<script> alert('Email already exists!');</script>";
-//     }
-//     else{
-//         if($password == $confirmpassword){
-//             $query = "INSERT INTO users VALUES ('','$fName','$lName','$email','$password'";
-//             mysqli_query($conn, $query);
-//             echo 
-//             "<script>
-//                 alert('Registration successful! You will now be redirected to the login page.');
-//                 window.location.href = 'login.php'; // Redirect to login page
-//             </script>";
-//         }
-//         else{
-//             echo "<script> alert('Passwords do not match!');</script>";
-//         }
-//     }
-// }
-
-// require 'db.php';
-
-// if(isset($_POST["submit"])){
-//     $fName = $_POST["fName"];
-//     $lName = $_POST["lName"];
-//     $email = $_POST["email"];
-//     $password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
-//     $confirmpassword = $_POST["confirmpassword"];
-//     $duplicate = mysqli_query($conn, "SELECT * FROM users WHERE fName = '$fName' AND email = '$email'"); 
-//     if(mysqli_num_rows($duplicate) >0){
-//         echo 
-//         "<script> alert('User already exists!');</script>";
-      
-//     }  
-//     else{
-//         if($password_hash == $confirmpassword){
-//             $query = "INSERT INTO users VALUES('', '$fName', '$lName','$email','$passowrd_hash')";
-//             mysqli_query($conn, $query);
-//             echo
-//             "<script>
-//             alert('Registration successful! You will now be redirected to the login page.');
-//             window.location.href = 'login.html'; // Redirect to login page
-//         </script>";
-//         }
-//         else{
-//             echo
-//             "<script> alert('Passwords do not match!');</script>";
-//         }
-//     }
-// }
 
 
 ?>

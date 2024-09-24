@@ -2,16 +2,23 @@
 session_start();
 require 'db.php';
 
-// Check if user is logged in
-if (!isset($_SESSION["id"])) {
-    header("Location: login.php");
-    exit();
-} else {
+
+if (!empty($_SESSION["id"])) {
     $id = $_SESSION["id"];
     $result = mysqli_query($conn, "SELECT * FROM users WHERE id = $id");
     $row = mysqli_fetch_assoc($result);
+
+  
+    if ($row['role'] == 1) {
+        header("Location: index.php");
+        exit();
+    }
+} else {
+    header("Location: login.php");
+    exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>

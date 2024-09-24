@@ -2,13 +2,14 @@
 session_start();
 require 'db.php';
 
-if(!empty($_SESSION["id"])){
+if (!empty($_SESSION["id"])) {
     header("Location: index.php");
-} 
+    exit();
+}
 
 if (isset($_POST["submit"])) {
     $email = $_POST["email"];
-    $password = $_POST["password"];
+    $password = $_POST["password"];  // Store plain password
 
     // Use prepared statements to prevent SQL injection
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -18,108 +19,40 @@ if (isset($_POST["submit"])) {
     $row = $result->fetch_assoc();
 
     // Check if user exists
-    if ($result->num_rows > 0) {
-        // Check if the password matches
-        if ($password == $row["password"]) {
+    if ($row) {
+        // Verify the hashed password with the entered plain password
+        if (password_verify($password, $row["password_hash"])) {
             // Set session variables
             $_SESSION["login"] = true;
             $_SESSION["id"] = $row["id"];
             $_SESSION["role"] = $row["role"]; // Fetch the role from the DB
 
-            // Check the role and redirect accordingly
+            // Role-based redirection
             if ($row["role"] == 1) {
                 echo  "<script>
-                alert('You logged as Admin');
-                window.location.href = 'index.php'; // Redirect to login page
+                alert('You are logged in as Admin');
+                window.location.href = 'index.php'; // Redirect to Admin dashboard
                 </script>";
+            }    
+           
             } else {
-                // Role 0 (or any other) for client
+                // Role 0 (or any other) for regular users
                 echo  "<script>
-                alert('Welcome');
-                window.location.href = 'home.php'; // Redirect to login page
+                alert('Welcome, User!');
+                window.location.href = 'home.php'; // Redirect to user home
                 </script>";
             }
             exit(); // Ensure no further code is executed
         } else {
+            // Invalid password
             echo "<script>alert('Wrong email or password!');</script>";
         }
     } else {
+        // User not found
         echo "<script>alert('User not registered!');</script>";
     }
-}
 
-
-
-// if(isset($_POST["submit"])){    
-//     $email = $_POST["email"];
-//     $password = $_POST["password"];
-//     $result = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' ");
-//     $row = mysqli_fetch_assoc($result);
-//     if(mysqli_num_rows($result)> 0){
-//         if($password == $row["password"]){
-//         $_SESSION["login"] = true;
-//         $_SESSION["id"] = $row["id"];
-//         $_SESSION["role"] = $role;
-//         header("Location: index.php");
-//         if($role == 1){
-//             header("Location: home.php");
-//         }
-//     }
-//     else{
-//         echo "<script>alert('Wrong email or password!');</script>";
-//     }
-// }
-// else{
-//     echo 
-//     "<script>alert('User not registered!');</script>";
-//     }
-// }
-
-
-
-
-// if (!empty($_SESSION["id"])) {
-//     header("Location: index.php");
-// }
-
-    // session_start();
- 
-    // if(isset($_SESSION['login'])){
-    //     header("Location: index.php");
-    //     exit;
-    // }
-
-
-// if (isset($_POST["submit"])) {
-//     $email = $_POST["email"];
-//     $password = $_POST["password"];
-   
-
-//     // Use prepared statements to prevent SQL injection
-//     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-//     $stmt->bind_param("s", $email); 
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-    
-//     if ($result->num_rows > 0) {
-//         $row = $result->fetch_assoc();
-
-      
-
-//         // Ensure the column name is correct and match it with your database
-//         if (isset($row["password_hash"]) && password_verify($password, $row["password_hash"])) {
-//             $_SESSION["login"] = true;
-//             $_SESSION["id"] = $row["id"];
-//             header("Location: index.php");
-//         } else {
-//             echo "<script>alert('Wrong password!');</script>";
-//         }
-//     } else {
-//         echo "<script>alert('User not registered!');</script>";
-//     }
-// }
-
-
+?>
 
 ?>
 
@@ -135,7 +68,7 @@ if (isset($_POST["submit"])) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Login - SB Admin</title>
+        <title>Login</title>
         <link href="css/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>

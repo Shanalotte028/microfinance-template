@@ -1,34 +1,71 @@
 <?php
+session_start();
 include 'db.php';
 
+// Check if user is logged in
+if (!isset($_SESSION["id"])) {
+    header("Location: login.php");
+    exit();
+} else {
+    // Fetch the user's email from the session
+    $id = $_SESSION["id"];
+    $result = mysqli_query($conn, "SELECT email FROM users WHERE id = $id");
+    $user = mysqli_fetch_assoc($result);
+    $userEmail = $user['email'];
+  
+}
+
 if (isset($_POST['submit'])) {
-  // Certificate of Enrollment (COE)
-  $coe = $_FILES['coe']['name'];
-  $coe_tmp_name = $_FILES['coe']['tmp_name'];
+    // Check if the user's email has already been used for an application
+    $email_check_query = "SELECT * FROM images_coe_birthc WHERE email = '$userEmail'";
+    $email_check_result = mysqli_query($conn, $email_check_query);
 
-  // Birth Certificate (BC)
-  $birthc = $_FILES['birthc']['name'];
-  $birthc_tmp_name = $_FILES['birthc']['tmp_name'];
+    if (mysqli_num_rows($email_check_result) > 0) {
+        echo "<script>
+                alert('You have already applied for a scholarship with this account.');
+                window.location.href = 'home.php'; // Redirect back to home page
+              </script>";
+    } else {
+        // Collect other form details from the POST request
+        $fName = mysqli_real_escape_string($conn, $_POST['fName']);
+        $lName = mysqli_real_escape_string($conn, $_POST['lName']);
+        $address = mysqli_real_escape_string($conn, $_POST['address']);
 
-  // Directory where files will be saved
-  $uploadDir = 'images-coe-birthc/';
+        // Handle Certificate of Enrollment upload
+        $coe_name = $_FILES['coe']['name'];
+        $coe_temp = $_FILES['coe']['tmp_name'];
+        $coe_folder = 'images-coe-birthc/' . $coe_name;
 
-  // Path for each file
-  $coe_dest = $uploadDir . basename($coe);
-  $birthc_dest = $uploadDir . basename($birthc);
+        // Handle Birth Certificate upload
+        $birthc_name = $_FILES['birthc']['name'];
+        $birthc_temp = $_FILES['birthc']['tmp_name'];
+        $birthc_folder = 'images-coe-birthc/' . $birthc_name;
 
-  // Insert the image file names into the database
-  $query = "INSERT INTO `images-coe-birthc` (coe, birthc) VALUES ('$coe', '$birthc')";
-  $result = mysqli_query($conn, $query);
+        // Insert the application details into the database
+        $query = "INSERT INTO images_coe_birthc (fName, lName, Age, address, email, coe, birthc) 
+                  VALUES ('$fName', '$lName', '$Age', '$address', '$userEmail', '$coe_name', '$birthc_name')";
 
-  // Move the uploaded files to the server directory
-  if (move_uploaded_file($coe_tmp_name, $coe_dest) && move_uploaded_file($birthc_tmp_name, $birthc_dest)) {
-    echo "Files uploaded and saved successfully!";
-  } else {
-    echo "Failed to upload files.";
-  }
+        if (mysqli_query($conn, $query)) {
+            // Move uploaded files to the folder
+            if (move_uploaded_file($coe_temp, $coe_folder) && move_uploaded_file($birthc_temp, $birthc_folder)) {
+                echo "<script>
+                        alert('Application submitted successfully.');
+                        window.location.href = 'home.php'; // Redirect to home page
+                      </script>";
+            } else {
+                echo "<script>
+                        alert('File upload failed.');
+                        window.location.href = 'home.php'; // Redirect to home page
+                      </script>";
+            }
+        } else {
+            echo "Error inserting data: " . mysqli_error($conn);
+        }
+    }
 }
 ?>
+
+
 
 
 
@@ -42,11 +79,8 @@ if (isset($_POST['submit'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta name="description" content="" />
   <meta name="author" content="" />
-  <title>Register - SB Admin</title>
+  <title>Scholarship</title>
   <link href="css/styles.css" rel="stylesheet" />
-
-  <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js" defer></script>
-  <!-- <script src="/js/validate.js" defer></script> -->
 </head>
 
 <body class="bg-dark" style="--bs-bg-opacity: .95;">
@@ -61,78 +95,60 @@ if (isset($_POST['submit'])) {
                   <h3 class="text-center font-weight-light my-4 text-light">Fill up</h3>
                 </div>
 
-
                 <div class="card-body">
-                  <form class="" action="" method="post" id="" autocomplete="off" enctype="multipart/form-data">
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <div class="form-floating mb-3 mb-md-0">
-                          <input class="form-control" id="fName" name="fName" type="text" required value="" placeholder="Enter your first name" />
-                          <label for="fName">First name</label>
-                        </div>
-                      </div>
+                  <form action="" method="post" enctype="multipart/form-data" autocomplete="off">
 
-                      <div class="col-md-6">
-                        <div class="form-floating">
-                          <input class="form-control" id="lName" name="lName" type="text" required value="" placeholder="Enter your last name" />
-                          <label for="lName">Last name</label>
-                        </div>
-                      </div>
+                    <div class="form-floating mb-3">
+                      <input class="form-control" id="fName" name="fName" type="text" required placeholder="Enter your first name" />
+                      <label for="fName">First name</label>
                     </div>
 
+                    <div class="form-floating mb-3">
+                      <input class="form-control" id="lName" name="lName" type="text" required placeholder="Enter your last name" />
+                      <label for="lName">Last name</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input class="form-control" id="Age" name="Age" type="Age" required placeholder="Enter your Age" />
+                      <label for="Age">Age</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input class="form-control" id="email" name="email" type="email" required placeholder="Enter your email" />
+                      <label for="email">Email</label>
+                    </div>
 
 
                     <div class="form-floating mb-3">
-                      <input class="form-control" id="address" name="address" type="address" required value="" placeholder="address" />
+                      <input class="form-control" id="address" name="address" type="address" required placeholder="Address" />
                       <label for="address">Address</label>
                     </div>
+
 
                     <div class="form-floating mb-3">
                       <label for="coe" style="font-size: 1.2rem; position: absolute; top: -10px;">
                         Photo of Certificate of Enrollment
                       </label>
-                      <input class="form-control" id="coe" name="coe" type="file" required
-                        accept="image/*" style="height: 100px; font-size: 1.0rem; padding: 50px;">
+                      <input required value="" class="form-control" id="coe" name="coe" type="file" required accept="image/*"
+                        style="height: 100px; font-size: 1.0rem; padding: 50px;" onchange="previewImage('coe', 'coePreview')">
                     </div>
+                    <div id="coePreview"></div>
+
 
                     <div class="form-floating mb-3">
                       <label for="birthc" style="font-size: 1.2rem; position: absolute; top: -10px;">
                         Photo of Birth Certificate
                       </label>
-                      <input class="form-control" id="birthc" name="birthc" type="file" required
-                        accept="image/*" style="height: 100px; font-size: 1.0rem; padding: 50px;">
+                      <input required value="" class="form-control" id="birthc" name="birthc" type="file" required accept="image/*"
+                        style="height: 100px; font-size: 1.0rem; padding: 50px;" onchange="previewImage('birthc', 'birthcPreview')">
                     </div>
-                    <div>
-                      <?php
-                    $res = mysqli_query($conn, "SELECT * FROM images-coe-birthc");
-                    while ($row = mysqli_fetch_assoc($res)) {
-                    ?>
-                       <h3>Certificate of Enrollment</h3>
-                       <img src="images-coe-birthc/<?php echo $row['coe']; ?>" alt="COE" style="max-width: 300px;">
-
-                       <h3>Birth Certificate</h3>
-                       <img src="images-coe-birthc/<?php echo $row['birthc']; ?>" alt="Birth Certificate" style="max-width: 300px;">
-                       <?php
-                        }
-                          ?>
-
-                    </div>
-                    
-
-
-
-
-
-
-
+                    <div id="birthcPreview"></div>
 
                     <div class="mt-4 mb-0 text-center">
                       <button type="submit" name="submit" class="btn btn-success btn-block">Submit</button>
                     </div>
                   </form>
-                  </form>
                 </div>
-
 
                 <div class="card-footer text-center py-3">
                   <div class="small"><a href="home.php" class="text-muted">Go Back</a></div>
@@ -143,6 +159,7 @@ if (isset($_POST['submit'])) {
         </div>
       </main>
     </div>
+
     <div id="layoutAuthentication_footer">
       <footer class="py-4 bg-light mt-auto bg-dark">
         <div class="container-fluid px-4">
@@ -158,8 +175,32 @@ if (isset($_POST['submit'])) {
       </footer>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-  <script src="js/scripts.js"></script>
+
+
+  <script>
+    function previewImage(inputId, previewId) {
+      var input = document.getElementById(inputId);
+      var previewContainer = document.getElementById(previewId);
+
+      previewContainer.innerHTML = '';
+
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.maxWidth = '500px';
+          img.style.height = 'auto';
+          previewContainer.appendChild(img);
+        };
+
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
 </body>
 
 </html>
