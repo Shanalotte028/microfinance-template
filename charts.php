@@ -1,0 +1,259 @@
+<?php
+// Connect to your database
+require 'db.php';  // Assuming you have a db.php for database connection
+
+// Fetch the ages from the database
+$query = "SELECT Age FROM images_coe_birthc";
+$result = mysqli_query($conn, $query);
+
+// Check if the query executed successfully and has results
+if ($result) {
+    $ages = array();
+    while ($row = mysqli_fetch_assoc($result)) {
+        $ages[] = $row['Age'];
+    }
+} else {
+    die("Query failed: " . mysqli_error($conn));
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Home Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+
+<body class="sb-nav-fixed bg-dark">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" href="home.php">Microfinance</a>
+        <!-- User Dropdown -->
+        <ul class="navbar-nav ms-auto me-3 me-lg-4">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Core</div>
+                        <a class="nav-link" href="index.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+                        <div class="sb-sidenav-menu-heading">Addons</div>
+                        <a class="nav-link" href="charts.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                            Charts
+                        </a>
+                        <a class="nav-link" href="tables.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            Tables
+                        </a>
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer bg-dark">
+                    <div class="small">Logged in as:</div>
+                    Start Bootstrap
+                </div>
+            </nav>
+        </div>
+        <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4 text-light">Charts</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="index.php" class="text-light">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Charts</li>
+                    </ol>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            Chart.js is a third-party plugin that is used to generate the charts in this template. For further customization options, please visit the official <a target="_blank" href="https://www.chartjs.org/docs/latest/">Chart.js documentation</a>.
+                        </div>
+                    </div>
+
+                    <!-- Area Chart Example -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-chart-area me-1"></i>
+                            Applicant Age Area Chart
+                        </div>
+                        <!-- <h1>Applicant Age Area Chart</h1> -->
+                        <canvas id="myAreaChart" width="100%" height="30"></canvas>
+
+                        <script>
+                            // Debugging output for ages
+                            console.log(<?php echo json_encode($ages); ?>); // Check output in console
+
+                            var ages = <?php echo json_encode($ages); ?>;
+
+                            var ctx = document.getElementById("myAreaChart");
+                            var myLineChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: Array.from({
+                                        length: ages.length
+                                    }, (_, i) => `Applicant ${i + 1}`),
+                                    datasets: [{
+                                        label: "Age",
+                                        backgroundColor: "rgba(2,117,216,0.2)",
+                                        borderColor: "rgba(2,117,216,1)",
+                                        data: ages,
+                                    }],
+                                },
+                                options: {
+                                    scales: {
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Applicants'
+                                            }
+                                        },
+                                        y: {
+                                            title: {
+                                                display: true,
+                                                text: 'Age'
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        </script>
+                        <div class="card-body">
+                            <canvas id="myAreaChart" width="100%" height="30"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bar and Pie Chart (Optional) -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-1"></i>
+                                    Bar Chart Example
+                                </div>
+                                <div class="card-body"><canvas id="myBarChart" width="100%" height="50"></canvas></div>
+                                <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-pie me-1"></i>
+                                    Pie Chart Example
+                                </div>
+                                <div class="card-body"><canvas id="myPieChart" width="100%" height="50"></canvas></div>
+                                <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto bg-dark">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                        <div>
+                            <a href="#" class="text-muted">Privacy Policy</a>
+                            &middot;
+                            <a href="#" class="text-muted">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Chart.js Rendering for the Area Chart -->
+    <script>
+        // Get the ages data from PHP
+        var ages = <?php echo json_encode($ages); ?>;
+
+        // Set new default font family and font color to mimic Bootstrap's default styling
+        Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#292b2c';
+
+        // Area Chart Example
+        var ctx = document.getElementById("myAreaChart");
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({
+                    length: ages.length
+                }, (_, i) => `Applicant ${i + 1}`), // Labels for applicants
+                datasets: [{
+                    label: "Age",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(2,117,216,0.2)",
+                    borderColor: "rgba(2,117,216,1)",
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(2,117,216,1)",
+                    pointBorderColor: "rgba(255,255,255,0.8)",
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                    pointHitRadius: 50,
+                    pointBorderWidth: 2,
+                    data: ages, // Use the ages data
+                }],
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'applicant'
+                        },
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: ages.length // Set ticks limit based on number of applicants
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: Math.min(...ages) - 5, // Adjust the Y axis min value dynamically
+                            max: Math.max(...ages) + 5, // Adjust the Y axis max value dynamically
+                            maxTicksLimit: 5
+                        },
+                        gridLines: {
+                            color: "rgba(0, 0, 0, .125)",
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                }
+            }
+        });
+    </script>
+
+    <!-- Bootstrap Bundle and Other Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
+       
+    <script src="assets/demo/chart-bar-demo.js"></script>
+    <script src="assets/demo/chart-pie-demo.js"></script>
+</body>
+
+</html>

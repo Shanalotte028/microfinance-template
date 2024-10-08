@@ -2,6 +2,7 @@
 session_start();
 require 'db.php';
 
+// Redirect if user is already logged in
 if (!empty($_SESSION["id"])) {
     header("Location: index.php");
     exit();
@@ -26,18 +27,15 @@ if (isset($_POST["submit"])) {
             $_SESSION["login"] = true;
             $_SESSION["id"] = $row["id"];
             $_SESSION["role"] = $row["role"]; // Fetch the role from the DB
-
+            
             // Role-based redirection
-            if ($row["role"] == 1) {
-                echo  "<script>
+            if ($row["role"] == 1) {  // Admin role
+                echo "<script>
                 alert('You are logged in as Admin');
                 window.location.href = 'index.php'; // Redirect to Admin dashboard
                 </script>";
-            }    
-           
-            } else {
-                // Role 0 (or any other) for regular users
-                echo  "<script>
+            } elseif ($row["role"] == 0) {  // Regular user role
+                echo "<script>
                 alert('Welcome, User!');
                 window.location.href = 'home.php'; // Redirect to user home
                 </script>";
@@ -47,14 +45,15 @@ if (isset($_POST["submit"])) {
             // Invalid password
             echo "<script>alert('Wrong email or password!');</script>";
         }
-    // } else {
-    //     // User not found
-    //     echo "<script>alert('User not registered!');</script>";
+    } else {
+        // User not found
+        echo "<script>alert('User not registered!');</script>";
     }
-
+}
 ?>
 
-?>
+
+
 
 
 

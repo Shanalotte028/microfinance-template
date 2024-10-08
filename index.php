@@ -73,11 +73,11 @@ if (!empty($_SESSION["id"])) {
                         </a>
 
                         <div class="sb-sidenav-menu-heading">Addons</div>
-                        <a class="nav-link" href="charts.html">
+                        <a class="nav-link" href="charts.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Charts
                         </a>
-                        <a class="nav-link" href="tables.html">
+                        <a class="nav-link" href="tables.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                             Tables
                         </a>
@@ -199,6 +199,34 @@ if (!empty($_SESSION["id"])) {
                 $query = "SELECT * FROM images_coe_birthc";
                 $result = mysqli_query($conn, $query);
 
+                // Handle Approve/Decline/Delete requests
+                if (isset($_POST['action']) && isset($_POST['id'])) {
+                    $id = $_POST['id'];
+                    $action = $_POST['action'];
+
+                    if ($action == 'approve') {
+                        // Update the status to 'Approved' and set the date_status_updated
+                        $update_query = "UPDATE images_coe_birthc SET status = 'Approved', date_status_updated = NOW() WHERE id = ?";
+                    } elseif ($action == 'decline') {
+                        // Update the status to 'Declined' and set the date_status_updated
+                        $update_query = "UPDATE images_coe_birthc SET status = 'Declined', date_status_updated = NOW() WHERE id = ?";
+                    }
+
+                    // Prepare and execute the update query for approval or decline
+                    if (isset($update_query)) {
+                        $stmt = $conn->prepare($update_query);
+                        $stmt->bind_param('i', $id); // Bind the ID
+                        if ($stmt->execute()) {
+                            echo  "<script>
+                                alert('Record updated successfully');
+                                window.location.href = 'index.php'; // Redirect to index page
+                                </script>";
+                        } else {
+                            echo "Error updating record: " . mysqli_error($conn);
+                        }
+                    }
+                }
+
                 // Fetch and display the records
                 if (mysqli_num_rows($result) > 0) {
                     while ($row = mysqli_fetch_assoc($result)) {
@@ -278,6 +306,7 @@ if (!empty($_SESSION["id"])) {
         });
     });
 </script>
+
 
 
             </main>
