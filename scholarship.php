@@ -7,67 +7,64 @@ if (!isset($_SESSION["id"])) {
     header("Location: login.php");
     exit();
 } else {
-    // Fetch the user's email from the session
+    // Fetch the logged-in user's ID and email from the session
     $id = $_SESSION["id"];
     $result = mysqli_query($conn, "SELECT email FROM users WHERE id = $id");
     $user = mysqli_fetch_assoc($result);
     $userEmail = $user['email'];
-  
 }
 
 if (isset($_POST['submit'])) {
-  // Check if the user's email has already been used for an application
-  $email_check_query = "SELECT * FROM images_coe_birthc WHERE email = '$userEmail'";
-  $email_check_result = mysqli_query($conn, $email_check_query);
+    // Check if the user's email has already been used for an application
+    $email_check_query = "SELECT * FROM images_coe_birthc WHERE email = '$userEmail'";
+    $email_check_result = mysqli_query($conn, $email_check_query);
 
-  if (mysqli_num_rows($email_check_result) > 0) {
-      echo "<script>
-              alert('You have already applied for a scholarship with this account.');
-              window.location.href = 'home.php'; // Redirect back to home page
-            </script>";
-  } else {
-      // Collect other form details from the POST request
-      $fName = mysqli_real_escape_string($conn, $_POST['fName']);
-      $lName = mysqli_real_escape_string($conn, $_POST['lName']);
-      $address = mysqli_real_escape_string($conn, $_POST['address']);
-      
-      // Capture the Age value from POST
-      $Age = mysqli_real_escape_string($conn, $_POST['Age']); // Make sure to get the Age input
+    if (mysqli_num_rows($email_check_result) > 0) {
+        echo "<script>
+                alert('You have already applied for a scholarship with this account.');
+                window.location.href = 'home.php'; // Redirect back to home page
+              </script>";
+    } else {
+        // Collect other form details from the POST request
+        $fName = mysqli_real_escape_string($conn, $_POST['fName']);
+        $lName = mysqli_real_escape_string($conn, $_POST['lName']);
+        $address = mysqli_real_escape_string($conn, $_POST['address']);
+        $Age = mysqli_real_escape_string($conn, $_POST['Age']); // Ensure you're capturing 'Age' input
 
-      // Handle Certificate of Enrollment upload
-      $coe_name = $_FILES['coe']['name'];
-      $coe_temp = $_FILES['coe']['tmp_name'];
-      $coe_folder = 'images-coe-birthc/' . $coe_name;
+        // Handle Certificate of Enrollment upload
+        $coe_name = $_FILES['coe']['name'];
+        $coe_temp = $_FILES['coe']['tmp_name'];
+        $coe_folder = 'images-coe-birthc/' . $coe_name;
 
-      // Handle Birth Certificate upload
-      $birthc_name = $_FILES['birthc']['name'];
-      $birthc_temp = $_FILES['birthc']['tmp_name'];
-      $birthc_folder = 'images-coe-birthc/' . $birthc_name;
+        // Handle Birth Certificate upload
+        $birthc_name = $_FILES['birthc']['name'];
+        $birthc_temp = $_FILES['birthc']['tmp_name'];
+        $birthc_folder = 'images-coe-birthc/' . $birthc_name;
 
-      // Insert the application details into the database
-      $query = "INSERT INTO images_coe_birthc (fName, lName, Age, address, email, coe, birthc) 
-                VALUES ('$fName', '$lName', '$Age', '$address', '$userEmail', '$coe_name', '$birthc_name')";
+        // Insert the application details along with the logged-in user's ID into the database
+        $query = "INSERT INTO images_coe_birthc (user_id, fName, lName, Age, address, email, coe, birthc) 
+                  VALUES ('$id', '$fName', '$lName', '$Age', '$address', '$userEmail', '$coe_name', '$birthc_name')";
 
-      if (mysqli_query($conn, $query)) {
-          // Move uploaded files to the folder
-          if (move_uploaded_file($coe_temp, $coe_folder) && move_uploaded_file($birthc_temp, $birthc_folder)) {
-              echo "<script>
-                      alert('Application submitted successfully.');
-                      window.location.href = 'home.php'; // Redirect to home page
-                    </script>";
-          } else {
-              echo "<script>
-                      alert('File upload failed.');
-                      window.location.href = 'home.php'; // Redirect to home page
-                    </script>";
-          }
-      } else {
-          echo "Error inserting data: " . mysqli_error($conn);
-      }
-  }
+        if (mysqli_query($conn, $query)) {
+            // Move uploaded files to the folder
+            if (move_uploaded_file($coe_temp, $coe_folder) && move_uploaded_file($birthc_temp, $birthc_folder)) {
+                echo "<script>
+                        alert('Application submitted successfully.');
+                        window.location.href = 'home.php'; // Redirect to home page
+                      </script>";
+            } else {
+                echo "<script>
+                        alert('File upload failed.');
+                        window.location.href = 'home.php'; // Redirect to home page
+                      </script>";
+            }
+        } else {
+            echo "Error inserting data: " . mysqli_error($conn);
+        }
+    }
 }
-
 ?>
+
 
 
 

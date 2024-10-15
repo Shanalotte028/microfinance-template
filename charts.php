@@ -1,7 +1,13 @@
 <?php
-// Connect to your database
-require 'db.php';  // Assuming you have a db.php for database connection
 
+session_start();
+require 'db.php'; // Ensure your database connection is successful
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
+    header("Location: login.php");
+    exit();
+}
 // Fetch the ages from the database
 $query = "SELECT Age FROM images_coe_birthc";
 $result = mysqli_query($conn, $query);
@@ -87,17 +93,17 @@ if ($result) {
                         <li class="breadcrumb-item"><a href="index.php" class="text-light">Dashboard</a></li>
                         <li class="breadcrumb-item active">Charts</li>
                     </ol>
-                    <div class="card mb-4">
+                    <!-- <div class="card mb-4">
                         <div class="card-body">
                             Chart.js is a third-party plugin that is used to generate the charts in this template. For further customization options, please visit the official <a target="_blank" href="https://www.chartjs.org/docs/latest/">Chart.js documentation</a>.
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Area Chart Example -->
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-chart-area me-1"></i>
-                            Applicant Age Area Chart
+                           Schorlarship Applicants Age chart
                         </div>
                         <!-- <h1>Applicant Age Area Chart</h1> -->
                         <canvas id="myAreaChart" width="100%" height="30"></canvas>

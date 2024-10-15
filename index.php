@@ -1,24 +1,20 @@
 <?php
+
 session_start();
-require 'db.php';
+require 'db.php'; // Ensure your database connection is successful
 
-
-if (!empty($_SESSION["id"])) {
-    $id = $_SESSION["id"];
-    $result = mysqli_query($conn, "SELECT * FROM users WHERE id = $id");
-    $row = mysqli_fetch_assoc($result);
-
-    
-    if ($row['role'] == 0) {
-        header("Location: home.php");
-        exit();
-    }
-} else {
-    
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
     header("Location: login.php");
     exit();
 }
+
+
+
+
 ?>
+
+
 
 
 
@@ -36,12 +32,15 @@ if (!empty($_SESSION["id"])) {
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="index.html">Microfinance</a>
+        <a class="navbar-brand ps-3" href="index.php">Microfinance</a>
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
         <!-- Navbar Search-->
@@ -52,14 +51,20 @@ if (!empty($_SESSION["id"])) {
         </form>
         <!-- Navbar-->
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="navbarDropdown">
-
+        <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
                 </ul>
             </li>
         </ul>
+        </ul>
+         <!-- Bootstrap JS and Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
     </nav>
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
@@ -94,46 +99,9 @@ if (!empty($_SESSION["id"])) {
                 <div class="container-fluid px-4">
                     <h1 class="mt-4 text-light">Dashboard</h1>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Dashboard</li>
+                       
                     </ol>
-                    <div class="row">
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-primary text-white mb-4">
-                                <div class="card-body">Primary Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-warning text-white mb-4">
-                                <div class="card-body">Warning Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-success text-white mb-4">
-                                <div class="card-body">Success Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-danger text-white mb-4">
-                                <div class="card-body">Danger Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="row">
                         <div class="col-xl-6">
                             <div class="card mb-4">
@@ -199,7 +167,7 @@ if (!empty($_SESSION["id"])) {
                 $query = "SELECT * FROM images_coe_birthc";
                 $result = mysqli_query($conn, $query);
 
-                // Handle Approve/Decline/Delete requests
+                // Handle Approve/Decline requests
                 if (isset($_POST['action']) && isset($_POST['id'])) {
                     $id = $_POST['id'];
                     $action = $_POST['action'];
@@ -217,10 +185,25 @@ if (!empty($_SESSION["id"])) {
                         $stmt = $conn->prepare($update_query);
                         $stmt->bind_param('i', $id); // Bind the ID
                         if ($stmt->execute()) {
-                            echo  "<script>
-                                alert('Record updated successfully');
-                                window.location.href = 'index.php'; // Redirect to index page
-                                </script>";
+                            // Fetch the email to auto-populate in the modal
+                            $email_query = "SELECT email FROM images_coe_birthc WHERE id = ?";
+                            $stmt_email = $conn->prepare($email_query);
+                            $stmt_email->bind_param('i', $id);
+                            $stmt_email->execute();
+                            $stmt_email->bind_result($email);
+                            $stmt_email->fetch();
+                            $stmt_email->close();
+
+                            // Pass data to JavaScript
+                            echo "<script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    document.getElementById('statusId').value = '$id';
+                                    document.getElementById('statusAction').value = '$action';
+                                    document.getElementById('emailInput').value = '$email';
+                                    var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+                                    statusModal.show();
+                                });
+                            </script>";
                         } else {
                             echo "Error updating record: " . mysqli_error($conn);
                         }
@@ -235,8 +218,8 @@ if (!empty($_SESSION["id"])) {
                             <td><?php echo htmlspecialchars($row['id']); ?></td>
                             <td><?php echo htmlspecialchars($row['fName']); ?></td>
                             <td><?php echo htmlspecialchars($row['lName']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Age']); ?></td> <!-- Display Age -->
-                            <td><?php echo htmlspecialchars($row['email']); ?></td> <!-- Display Email -->
+                            <td><?php echo htmlspecialchars($row['Age']); ?></td>
+                            <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td><?php echo htmlspecialchars($row['address']); ?></td>
                             <td>
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="images-coe-birthc/<?php echo htmlspecialchars($row['coe']); ?>">
@@ -252,15 +235,15 @@ if (!empty($_SESSION["id"])) {
                             <td><?php echo htmlspecialchars($row['date_uploaded']); ?></td>
                             <td><?php echo htmlspecialchars($row['date_status_updated']); ?></td>
                             <td>
-                                <form method="POST" action="">
-                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                    <?php if ($row['status'] == 'Pending') { ?>
-                                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                                        <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
-                                    <?php } elseif ($row['status'] == 'Approved' || $row['status'] == 'Declined') { ?>
-                                        <button type="submit" name="action" value="remove" class="btn btn-warning btn-sm">Remove</button>
-                                    <?php } ?>
-                                </form>
+                                <?php if ($row['status'] == 'Pending') { ?>
+                                    <form method="POST" action="">
+                                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" data-id="<?php echo $row['id']; ?>">Approve</button>
+                                        <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm" data-id="<?php echo $row['id']; ?>">Decline</button>
+                                        <input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+                                    </form>
+                                <?php } elseif ($row['status'] == 'Approved' || $row['status'] == 'Declined') { ?>
+                                    <button type="submit" name="action" value="remove" class="btn btn-warning btn-sm">Remove</button>
+                                <?php } ?>
                             </td>
                         </tr>
                 <?php
@@ -271,6 +254,36 @@ if (!empty($_SESSION["id"])) {
                 ?>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal for Approve/Decline with Message -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="notify.php" >
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusModalLabel">Send Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="statusId" name="id" value=""> <!-- Hidden input to hold the ID -->
+                    <input type="hidden" id="statusAction" name="action" value=""> <!-- Hidden input for the action -->
+                    <div class="form-group">
+                        <label for="emailInput">Email</label>
+                        <input type="email" class="form-control" id="emailInput" name="email" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message to Applicant</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" placeholder="Enter your message..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Send Notification</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -306,6 +319,11 @@ if (!empty($_SESSION["id"])) {
         });
     });
 </script>
+
+
+
+
+
 
 
 

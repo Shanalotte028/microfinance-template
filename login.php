@@ -4,7 +4,14 @@ require 'db.php';
 
 // Redirect if user is already logged in
 if (!empty($_SESSION["id"])) {
-    header("Location: index.php");
+    // Role-based redirection if already logged in
+    if ($_SESSION["role"] == 1) {  // Admin
+        header("Location: index.php");
+    } elseif ($_SESSION["role"] == 0) {  // Regular User
+        header("Location: home.php");
+    } elseif ($_SESSION["role"] == 3) {  // Instructor
+        header("Location: instructor.php");
+    }
     exit();
 }
 
@@ -39,6 +46,11 @@ if (isset($_POST["submit"])) {
                 alert('Welcome, User!');
                 window.location.href = 'home.php'; // Redirect to user home
                 </script>";
+            } elseif ($row["role"] == 3) {  // Instructor role
+                echo "<script>
+                alert('Welcome, Instructor!');
+                window.location.href = 'instructor.php'; // Redirect to instructor page
+                </script>";
             }
             exit(); // Ensure no further code is executed
         } else {
@@ -51,6 +63,13 @@ if (isset($_POST["submit"])) {
     }
 }
 ?>
+
+
+
+
+
+
+
 
 
 
