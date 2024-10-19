@@ -38,22 +38,13 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
 </head>
 
 <body class="sb-nav-fixed">
+    <!-- Top Navigation Bar -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <!-- Navbar Brand-->
         <a class="navbar-brand ps-3" href="index.php">Microfinance</a>
-        <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-        <!-- Navbar Search-->
-        <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            <div class="input-group">
-
-            </div>
-        </form>
-        <!-- Navbar-->
-        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-user fa-fw"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -61,12 +52,10 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                 </ul>
             </li>
         </ul>
-        </ul>
-         <!-- Bootstrap JS and Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-</body>
     </nav>
+
     <div id="layoutSidenav">
+        <!-- Sidebar -->
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
@@ -77,10 +66,31 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                             Dashboard
                         </a>
 
-                        <div class="sb-sidenav-menu-heading">Addons</div>
-                        <a class="nav-link" href="charts.php">
+                        <a class="nav-link" href="scholar_app.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Charts
+                            Scholarship applications
+                        </a>
+                        <a class="nav-link" href="job_app.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                            Job applications
+                        </a>
+                        <a class="nav-link" href="tesda_app.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                            Tesda applications
+                        </a>
+
+                        <div class="sb-sidenav-menu-heading">Charts</div>
+                        <a class="nav-link" href="scholar_chart.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                           Scholarship Charts
+                        </a>
+                        <a class="nav-link" href="job_chart.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                           Job Charts
+                        </a>
+                        <a class="nav-link" href="tesda_chart.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                         Tesda Charts
                         </a>
                         <a class="nav-link" href="tables.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
@@ -94,41 +104,47 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                 </div>
             </nav>
         </div>
+
+        <!-- Content -->
         <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4 text-light">Dashboard</h1>
-                    <ol class="breadcrumb mb-4">
-                       
-                    </ol>
                     
                     <div class="row">
-                        <div class="col-xl-6">
+                        <!-- Example of an Area Chart -->
+                        <div class="col-lg-6">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <i class="fas fa-chart-area me-1"></i>
-                                    Area Chart Example
+                                    <i class="fas fa-chart-area me-1"></i> Area Chart Example
                                 </div>
-                                <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                                <div class="card-body">
+                                    <canvas id="myAreaChart" width="100%" height="40"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-xl-6">
+
+                        <!-- Example of a Bar Chart -->
+                        <div class="col-lg-6">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <i class="fas fa-chart-bar me-1"></i>
-                                    Bar Chart Example
+                                    <i class="fas fa-chart-bar me-1"></i> Bar Chart Example
                                 </div>
-                                <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                                <div class="card-body">
+                                    <canvas id="myBarChart" width="100%" height="40"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-table me-1"></i>
-        Uploaded Documents DataTable
-    </div>
-    <div class="card-body">
-        <table id="datatablesSimple">
+
+                    
+<div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i> Scholarship
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table id="datatablesSimple" class="table table-striped table-bordered">
+                            
             <thead>
                 <tr>
                     <th>ID</th>
@@ -136,7 +152,9 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                     <th>Last Name</th>
                     <th>Age</th>
                     <th>Email</th>
-                    <th>Address</th>
+                    <th>Street</th>
+                    <th>barangay</th>
+                    <th>City</th>
                     <th>Certificate of Enrollment</th>
                     <th>Birth Certificate</th>
                     <th>Status</th>
@@ -152,7 +170,9 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                     <th>Last Name</th>
                     <th>Age</th>
                     <th>Email</th>
-                    <th>Address</th>
+                    <th>Street</th>
+                    <th>barangay</th>
+                    <th>City</th>
                     <th>Certificate of Enrollment</th>
                     <th>Birth Certificate</th>
                     <th>Status</th>
@@ -220,7 +240,9 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                             <td><?php echo htmlspecialchars($row['lName']); ?></td>
                             <td><?php echo htmlspecialchars($row['Age']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
-                            <td><?php echo htmlspecialchars($row['address']); ?></td>
+                            <td><?php echo htmlspecialchars($row['street']); ?></td>
+                            <td><?php echo htmlspecialchars($row['barangay']); ?></td>
+                            <td><?php echo htmlspecialchars($row['city']); ?></td>
                             <td>
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="images-coe-birthc/<?php echo htmlspecialchars($row['coe']); ?>">
                                     <img src="images-coe-birthc/<?php echo htmlspecialchars($row['coe']); ?>" alt="COE" style="width: 100px;">
@@ -256,6 +278,9 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
         </table>
     </div>
 </div>
+
+
+
 
 <!-- Modal for Approve/Decline with Message -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
@@ -327,28 +352,36 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
 
 
 
-            </main>
-            <footer class="py-4 bg-light mt-auto bg-dark">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                        <div>
-                            <a href="#" class="text-muted">Privacy Policy</a>
-                            &middot;
-                            <a href="#" class="text-muted">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+</main>
+
+<!-- Footer -->
+<footer class="py-4 bg-light mt-auto bg-dark">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+            <div>
+                <a href="#">Privacy Policy</a>
+                &middot;
+                <a href="#">Terms &amp; Conditions</a>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="js/scripts.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="assets/demo/chart-area-demo.js"></script>
-    <script src="assets/demo/chart-bar-demo.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-    <script src="js/datatables-simple-demo.js"></script>
+</footer>
+</div>
+</div>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/scripts.js"></script>
+
+<!-- Chart.js Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="assets/demo/chart-area-demo.js"></script>
+<script src="assets/demo/chart-bar-demo.js"></script>
+
+<!-- Simple DataTables Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script src="js/datatables-simple-demo.js"></script>
 </body>
 
 </html>

@@ -8,29 +8,29 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 0) {
     header("Location: login.php");
     exit();
 }
-// Get the logged-in user's ID
-$user_id = $_SESSION['id'];
+// // Get the logged-in user's ID
+// $user_id = $_SESSION['id'];
 
-// Check if the user already has a submission
-$check_query = "SELECT COUNT(*) AS count FROM certificate WHERE id = ?";
-$stmt = $conn->prepare($check_query);
+// // Check if the user already has a submission
+// $check_query = "SELECT COUNT(*) AS count FROM certificate WHERE id = ?";
+// $stmt = $conn->prepare($check_query);
 
-// Check if prepare() was successful
-if ($stmt === false) {
-    die('Error in prepare: ' . htmlspecialchars($conn->error));
-}
+// // Check if prepare() was successful
+// if ($stmt === false) {
+//     die('Error in prepare: ' . htmlspecialchars($conn->error));
+// }
 
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$stmt->bind_result($submission_count);
-$stmt->fetch();
-$stmt->close();
+// $stmt->bind_param('i', $user_id);
+// $stmt->execute();
+// $stmt->bind_result($submission_count);
+// $stmt->fetch();
+// $stmt->close();
 
-// If submission already exists, redirect to certi.php
-if ($submission_count > 0) {
-    header('Location: certi.php');
-    exit();
-}
+// // If submission already exists, redirect to certi.php
+// if ($submission_count > 0) {
+//     header('Location: certi.php');
+//     exit();
+// }
 
 
 
@@ -85,9 +85,9 @@ if ($submission_count > 0) {
           data-bs-toggle="dropdown" aria-expanded="false">
           <i class="fas fa-user fa-fw"></i>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="navbarDropdown">
           <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
-          <li><a class="dropdown-item" href="certi.php">Profile</a></li>
+          <li><a class="dropdown-item text-muted" href="profile.php">Profile</a></li>
         </ul>
       </li>
     </ul>
@@ -154,6 +154,7 @@ if ($submission_count > 0) {
       <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
       <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
       <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
     </div>
 
     <div class="carousel-inner">
@@ -164,6 +165,7 @@ if ($submission_count > 0) {
           <h1 class="display-1 fw-bolder text-capitalize">Join our Seminar This October</h1>
         </div>
       </div>
+
       <div class="carousel-item" style="height: 100vh; min-height: 300px;">
         <img src="certificates.jpg" class="d-block w-100" alt="Slide 2" style="height: 100%; object-fit: cover; filter: brightness(0.6);">
         <div class="carousel-caption top-0 mt-4">
@@ -172,6 +174,7 @@ if ($submission_count > 0) {
           <button class="btn px-4 py-2 fs-5 mt-5"><a href="certificate.php">Click here</a></button>
         </div>
       </div>
+
       <div class="carousel-item" style="height: 100vh; min-height: 300px;">
         <img src="scholar.jpg" class="d-block w-100" alt="Slide 3" style="height: 100%; object-fit: cover; filter: brightness(0.6);">
         <div class="carousel-caption top-0 mt-4">
@@ -180,6 +183,16 @@ if ($submission_count > 0) {
           <button class="btn px-4 py-2 fs-5 mt-5"><a href="scholarship.php">Click here</a></button>
         </div>
       </div>
+
+      <div class="carousel-item" style="height: 100vh; min-height: 300px;">
+        <img src="hiring.png" class="d-block w-100" alt="Slide 4" style="height: 100%; object-fit: cover; filter: brightness(0.6);">
+        <div class="carousel-caption top-0 mt-4">
+          <p class="text-uppercase fs-3 mt-5">WE ARE HIRING</p>
+          <p class="display-1 fw-bolder text-capitalize">BE PART OF OUR TEAM</p>
+          <button class="btn px-4 py-2 fs-5 mt-5"><a href="hire.php">Click here</a></button>
+        </div>
+      </div>
+
     </div>
 
     <button class="carousel-control-prev" type="button" data-bs-target="#hero-carousel" data-bs-slide="prev">

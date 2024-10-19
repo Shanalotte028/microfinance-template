@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+require 'db.php';
 
 // Check if user is logged in
 if (!isset($_SESSION["id"])) {
@@ -16,22 +16,53 @@ if (!isset($_SESSION["id"])) {
 
 if (isset($_POST['submit'])) {
     // Check if the user's email has already been used for an application
-    $email_check_query = "SELECT * FROM images_coe_birthc WHERE email = '$userEmail'";
-    $email_check_result = mysqli_query($conn, $email_check_query);
+    $email_check_query = "SELECT * FROM images_coe_birthc WHERE email = ?";
+    $stmt = $conn->prepare($email_check_query);
 
-    if (mysqli_num_rows($email_check_result) > 0) {
+    if ($stmt === false) {
+        echo "<p>Error preparing the query: " . htmlspecialchars($conn->error) . "</p>";
+        exit();
+    }
+
+    // Bind the email value to the query
+    $stmt->bind_param('s', $userEmail);
+
+    // Execute the query
+    $stmt->execute();
+
+    // Get the result
+    $result = $stmt->get_result();
+
+    // If a row is found, the user has already applied
+    if ($result->num_rows > 0) {
+        // Close the statement and show alert to the user
+        $stmt->close();
         echo "<script>
                 alert('You have already applied for a scholarship with this account.');
                 window.location.href = 'home.php'; // Redirect back to home page
               </script>";
+        exit(); // Stop the rest of the script from executing
     } else {
-        // Collect other form details from the POST request
+        // Process the form and store the new submission
         $fName = mysqli_real_escape_string($conn, $_POST['fName']);
         $lName = mysqli_real_escape_string($conn, $_POST['lName']);
-        $address = mysqli_real_escape_string($conn, $_POST['address']);
-        $Age = mysqli_real_escape_string($conn, $_POST['Age']); // Ensure you're capturing 'Age' input
+        $age = mysqli_real_escape_string($conn, $_POST['Age']);
+        $street = mysqli_real_escape_string($conn, $_POST['street']);
+        $barangay = mysqli_real_escape_string($conn, $_POST['barangay']);
+        $applicationType = mysqli_real_escape_string($conn, $_POST['application_type']);
 
-        // Handle Certificate of Enrollment upload
+        // Fetch city_id based on the selected city from the form
+        if (isset($_POST['city']) && !empty($_POST['city'])) {
+            $city_id = (int)$_POST['city']; // Make sure the city is selected and valid
+        } else {
+            echo "<script>
+                    alert('Please select a city.');
+                    window.location.href = 'scholarship.php'; // Redirect back to form
+                  </script>";
+            exit();
+        }
+
+        // Handle Certificate of Enrollment (COE) upload
         $coe_name = $_FILES['coe']['name'];
         $coe_temp = $_FILES['coe']['tmp_name'];
         $coe_folder = 'images-coe-birthc/' . $coe_name;
@@ -41,11 +72,21 @@ if (isset($_POST['submit'])) {
         $birthc_temp = $_FILES['birthc']['tmp_name'];
         $birthc_folder = 'images-coe-birthc/' . $birthc_name;
 
-        // Insert the application details along with the logged-in user's ID into the database
-        $query = "INSERT INTO images_coe_birthc (user_id, fName, lName, Age, address, email, coe, birthc) 
-                  VALUES ('$id', '$fName', '$lName', '$Age', '$address', '$userEmail', '$coe_name', '$birthc_name')";
+        // Prepare the insert query with user_id and city_id
+        $insert_query = "INSERT INTO images_coe_birthc (user_id, fName, lName, Age, street, barangay, city_id, email, coe, birthc, application_type) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt_insert = $conn->prepare($insert_query);
 
-        if (mysqli_query($conn, $query)) {
+        if ($stmt_insert === false) {
+            echo "<p>Error preparing the insert query: " . htmlspecialchars($conn->error) . "</p>";
+            exit();
+        }
+
+        // Bind the form values to the insert query, including user_id and city_id
+        $stmt_insert->bind_param('issississss', $id, $fName, $lName, $age, $street, $barangay, $city_id, $userEmail, $coe_name, $birthc_name, $applicationType);
+
+        // Execute the insert query
+        if ($stmt_insert->execute()) {
             // Move uploaded files to the folder
             if (move_uploaded_file($coe_temp, $coe_folder) && move_uploaded_file($birthc_temp, $birthc_folder)) {
                 echo "<script>
@@ -59,11 +100,20 @@ if (isset($_POST['submit'])) {
                       </script>";
             }
         } else {
-            echo "Error inserting data: " . mysqli_error($conn);
+            echo "<p>Error inserting data: " . htmlspecialchars($stmt_insert->error) . "</p>";
         }
+
+        // Close the insert statement
+        $stmt_insert->close();
     }
+
+    // Close the original statement
+    $stmt->close();
 }
 ?>
+
+
+
 
 
 
@@ -121,9 +171,33 @@ if (isset($_POST['submit'])) {
 
 
                     <div class="form-floating mb-3">
-                      <input class="form-control" id="address" name="address" type="address" required placeholder="Address" />
-                      <label for="address">Address</label>
+                      <input class="form-control" id="street" name="street" type="street" required placeholder="street" />
+                      <label for="street">Street</label>
                     </div>
+
+                    <div class="form-floating mb-3">
+                      <input class="form-control" id="barangay/subdivision" name="barangay" type="barangay" required placeholder="barangay"/>
+                      <label for="barangay">barangay/subdivision</label>
+                    </div>
+
+                    <!-- Assuming this is part of your form -->
+<div class="form-floating mb-3">
+    <select class="form-select" id="city" name="city" required>
+        <option value="">Select a City</option>
+        <?php
+        // Fetch city data from the `cities` table for the dropdown
+        $city_query = "SELECT city_id, city_name FROM cities";
+        $city_result = mysqli_query($conn, $city_query);
+
+        if (mysqli_num_rows($city_result) > 0) {
+            while ($row = mysqli_fetch_assoc($city_result)) {
+                echo "<option value='" . $row['city_id'] . "'>" . $row['city_name'] . "</option>";
+            }
+        }
+        ?>
+    </select>
+    <label for="city">City</label>
+</div>
 
 
                     <div class="form-floating mb-3">
@@ -145,6 +219,8 @@ if (isset($_POST['submit'])) {
                     </div>
                     <div id="birthcPreview"></div>
 
+
+                    <input type="hidden" name="application_type" value="scholarship"> <!-- Or "hiring" based on the page -->
                     <div class="mt-4 mb-0 text-center">
                       <button type="submit" name="submit" class="btn btn-success btn-block">Submit</button>
                     </div>

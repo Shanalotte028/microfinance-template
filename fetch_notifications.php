@@ -11,15 +11,23 @@ if (!isset($_SESSION['id'])) {
 // Get the logged-in user ID from the session
 $user_id = $_SESSION['id'];
 
-// // Debugging information
-// echo "<p>Debug: User ID from session is $user_id</p>";
-
-// Query to fetch notifications for the current user along with the status, date updated, and message
+// Query to fetch notifications from all three tables for the current user
 $query = "
-    SELECT images_coe_birthc.status, images_coe_birthc.date_status_updated, images_coe_birthc.message, users.fName
+    SELECT 'birthc' AS source, images_coe_birthc.status, images_coe_birthc.date_status_updated, images_coe_birthc.message, users.fName
     FROM users
     JOIN images_coe_birthc ON images_coe_birthc.user_id = users.id
     WHERE users.id = ?
+    UNION ALL
+    SELECT 'hiring' AS source, hiring.status, hiring.date_status_updated, hiring.message, users.fName
+    FROM users
+    JOIN hiring ON hiring.user_id = users.id
+    WHERE users.id = ?
+    UNION ALL
+    SELECT 'certificate' AS source, certificate.status, certificate.date_status_updated, certificate.message, users.fName
+    FROM users
+    JOIN certificate ON certificate.user_id = users.id
+    WHERE users.id = ?
+    ORDER BY date_status_updated DESC
 ";
 
 // Prepare the statement
@@ -30,15 +38,12 @@ if ($stmt === false) {
     exit();
 }
 
-// Bind the user ID to the query
-$stmt->bind_param('i', $user_id);
+// Bind the user ID to the query three times (for each UNION-ed query)
+$stmt->bind_param('iii', $user_id, $user_id, $user_id);
 
 // Execute the query
 if ($stmt->execute()) {
     $result = $stmt->get_result();
-
-    // // Debugging: Output the number of rows found
-    // echo "<p>Debug: Number of notifications found: " . $result->num_rows . "</p>";
 
     // Check if there are notifications
     if ($result->num_rows > 0) {
@@ -46,14 +51,13 @@ if ($stmt->execute()) {
         while ($row = $result->fetch_assoc()) {
             $message = !empty($row['message']) ? htmlspecialchars($row['message']) : 'No message provided';
             $status = htmlspecialchars($row['status']);
-            $fName = htmlspecialchars($row['fName']); // Use 'name' instead of 'fNfame'
+            $fName = htmlspecialchars($row['fName']);
             $date_updated = htmlspecialchars($row['date_status_updated']);
+            $source = htmlspecialchars($row['source']); // To know the source table
 
-            // Assuming $image_path is stored somewhere (e.g., profile pictures)
-            $image_path = 'profile_pic/default.jpg'; // Default image path if you don't have user-specific images
-
+            // Display the notifications with table-specific information
             echo "<div class='notification-item mb-3 p-2 border rounded'>";
-           
+            echo "<p><strong>Source: </strong>" . ucfirst($source) . "</p>"; // Show which table this notification came from
             echo "<p><strong>Name: </strong>$fName</p>";
             echo "<p><strong>Status: </strong>$status</p>";
             echo "<p><strong>Message: </strong>$message</p>";
