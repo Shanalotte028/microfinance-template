@@ -1,17 +1,12 @@
 <?php
-
 session_start();
-require 'db.php'; // Ensure your database connection is successful
+require 'db.php'; // Include database connection
 
-// Check if user is logged in and is an admin
-if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
+// Check if user is logged in and is an Employee
+if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
     header("Location: login.php");
     exit();
 }
-
-
-
-
 ?>
 
 
@@ -19,19 +14,22 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <title>Dashboard - SB Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-    <link href="css/styles.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-
-
-
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>Home Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+  <link href="css/styles.css" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <!-- Bootstrap JS (v5.1 or newer) -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body class="sb-nav-fixed">
@@ -40,14 +38,17 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
         <a class="navbar-brand ps-3" href="scholar_app.php">Microfinance</a>
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user fa-fw"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
-                </ul>
-            </li>
+           <!-- User Dropdown -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user fa-fw"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="navbarDropdown">
+          <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
+          <li><a class="dropdown-item text-muted" href="employee.php">Profile</a></li>
+        </ul>
+      </li>
         </ul>
     </nav>
 
@@ -78,23 +79,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                             Tesda applications
                         </a>
 
-                        <div class="sb-sidenav-menu-heading">Charts</div>
-                        <a class="nav-link" href="scholar_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Scholarship Charts
-                        </a>
-                        <a class="nav-link" href="job_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Job Charts
-                        </a>
-                        <a class="nav-link" href="tesda_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Tesda Charts
-                        </a>
-                        <a class="nav-link" href="tables.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
-                        </a>
+                        
                     </div>
                 </div>
                 <div class="sb-sidenav-footer bg-dark">

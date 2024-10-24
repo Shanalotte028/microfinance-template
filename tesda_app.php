@@ -23,7 +23,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
+<meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
@@ -61,11 +61,11 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="index.php">
+                        <!-- <a class="nav-link" href="index.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                             <li></li>
-                        </a>
+                        </a> -->
                         <a class="nav-link" href="scholar_app.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Scholarship applications
@@ -82,15 +82,15 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                         <div class="sb-sidenav-menu-heading">Charts</div>
                         <a class="nav-link" href="scholar_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                           Scholarship Charts
+                            Scholarship Charts
                         </a>
                         <a class="nav-link" href="job_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                           Job Charts
+                            Job Charts
                         </a>
                         <a class="nav-link" href="tesda_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                         Tesda Charts
+                            Tesda Charts
                         </a>
                         <a class="nav-link" href="tables.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
@@ -110,32 +110,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4 text-light">Tesda Details</h1>
-
-                    <div class="row">
-                        <!-- Example of an Area Chart -->
-                        <div class="col-lg-6">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-area me-1"></i> Area Chart Example
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="myAreaChart" width="100%" height="40"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Example of a Bar Chart -->
-                        <div class="col-lg-6">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-bar me-1"></i> Bar Chart Example
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="myBarChart" width="100%" height="40"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
 
                     <div class="card mb-4">
@@ -166,7 +140,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                         </tr>
                                     </thead>
                                     <tfoot>
-                                        <tr>
+                                        <!-- <tr>
                                             <th>ID</th>
                                             <th>First Name</th>
                                             <th>Last Name</th>
@@ -182,58 +156,76 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                             <th>Date Uploaded</th>
                                             <th>Date Status Updated</th>
                                             <th>Actions</th>
-                                        </tr>
+                                        </tr> -->
                                     </tfoot>
                                     <tbody>
                                         <?php
-                                        // Fetch data from the `certificate` table
-                                        $query = "SELECT * FROM certificate";
+                                        // Fetch data from the `certificate` table and join it with the `cities` table
+                                        $query = "SELECT certificate.*, cities.city_name 
+              FROM certificate 
+              LEFT JOIN cities ON certificate.city_id = cities.city_id";
+
                                         $result = mysqli_query($conn, $query);
 
-                                        // Handle Approve/Decline requests for certificate applications
-                                        if (isset($_POST['cert_action']) && isset($_POST['cert_id'])) {
-                                            $cert_id = $_POST['cert_id'];
-                                            $cert_action = $_POST['cert_action'];
-
-                                            if ($cert_action == 'approve') {
+                                        if (!$result) {
+                                            die('Query failed: ' . mysqli_error($conn)); // This will help identify any further issues
+                                        }
+    
+                                        // Handle Approve/Decline/Remove requests
+                                        if (isset($_POST['action']) && isset($_POST['id'])) {
+                                            $id = $_POST['id'];
+                                            $action = $_POST['action'];
+    
+                                            if ($action == 'Approved') {
                                                 // Update the status to 'Approved' and set the date_status_updated
                                                 $update_query = "UPDATE certificate SET status = 'Approved', date_status_updated = NOW() WHERE id = ?";
-                                            } elseif ($cert_action == 'decline') {
-                                                // Update the status to 'Declined' and set the date_status_updated
-                                                $update_query = "UPDATE certificate SET status = 'Declined', date_status_updated = NOW() WHERE id = ?";
+                                            } elseif ($action == 'Declined') {
+                                                // Update the status to 'Declined', set the date_status_updated, and automatically hide it
+                                                $update_query = "UPDATE certificate SET status = 'Declined', date_status_updated = NOW(), is_visible = 0 WHERE id = ?";
+                                            } elseif ($action == 'remove') {
+                                                // Update the `is_visible` to 0 (hide the record)
+                                                $remove_query = "UPDATE certificate SET is_visible = 0 WHERE id = ?";
                                             }
-
-                                            // Prepare and execute the update query for approval or decline
+    
+                                            // Prepare and execute the appropriate query for approval, decline, or remove
                                             if (isset($update_query)) {
                                                 $stmt = $conn->prepare($update_query);
-                                                $stmt->bind_param('i', $cert_id); // Bind the ID
+                                                $stmt->bind_param('i', $id); // Bind the ID
                                                 if ($stmt->execute()) {
-                                                    // Fetch the email to auto-populate in the modal
+                                                    // Fetch the email to auto-populate in the modal for approval or decline
                                                     $email_query = "SELECT email FROM certificate WHERE id = ?";
                                                     $stmt_email = $conn->prepare($email_query);
-                                                    $stmt_email->bind_param('i', $cert_id);
+                                                    $stmt_email->bind_param('i', $id);
                                                     $stmt_email->execute();
                                                     $stmt_email->bind_result($email);
                                                     $stmt_email->fetch();
                                                     $stmt_email->close();
-
-                                                    // Pass data to JavaScript (optional, for modal or alerts)
+    
+                                                    // Pass data to JavaScript for modal interaction
                                                     echo "<script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    document.getElementById('certStatusId').value = '$cert_id';
-                                    document.getElementById('certStatusAction').value = '$cert_action';
-                                    document.getElementById('certEmailInput').value = '$email';
-                                    var statusModal = new bootstrap.Modal(document.getElementById('certStatusModal'));
-                                    statusModal.show();
-                                });
-                            </script>";
+                        document.addEventListener('DOMContentLoaded', function () {
+                            document.getElementById('statusId').value = '$id';
+                            document.getElementById('statusAction').value = '$action';
+                            document.getElementById('emailInput').value = '$email';
+                            var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+                            statusModal.show();
+                        });
+                    </script>";
+                                                } else {
+                                                    echo "Error updating record: " . mysqli_error($conn);
+                                                }
+                                            } elseif (isset($remove_query)) {
+                                                $stmt = $conn->prepare($remove_query);
+                                                $stmt->bind_param('i', $id); // Bind the ID
+                                                if ($stmt->execute()) {
+                                                    echo "<script>alert('Record has been hidden successfully.');</script>";
                                                 } else {
                                                     echo "Error updating record: " . mysqli_error($conn);
                                                 }
                                             }
                                         }
-
-                                        // Fetch and display the certificate records
+    
+                                        // Fetch and display the records
                                         if (mysqli_num_rows($result) > 0) {
                                             while ($row = mysqli_fetch_assoc($result)) {
                                         ?>
@@ -246,14 +238,15 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['street']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['barangay']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['city']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['city_name']); // Fetching city name from the `cities` table 
+                                                        ?></td>
                                                     <td>
                                                         <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="certi/<?php echo htmlspecialchars($row['ids']); ?>">
-                                                            <img src="certi/<?php echo htmlspecialchars($row['ids']); ?>" alt="Valid ID" style="width: 100px;">
+                                                            <img src="certi/<?php echo htmlspecialchars($row['ids']); ?>" alt="ids" style="width: 100px;">
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="certi/<?php echo htmlspecialchars($row['birthc']); ?>">
+                                                        <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image=certi/<?php echo htmlspecialchars($row['birthc']); ?>">
                                                             <img src="certi/<?php echo htmlspecialchars($row['birthc']); ?>" alt="Birth Certificate" style="width: 100px;">
                                                         </a>
                                                     </td>
@@ -263,33 +256,38 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                                     <td>
                                                         <?php if ($row['status'] == 'Pending') { ?>
                                                             <form method="POST" action="">
-                                                                <button type="submit" name="cert_action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                                                                <button type="submit" name="cert_action" value="decline" class="btn btn-danger btn-sm">Decline</button>
-                                                                <input type="hidden" name="cert_id" value="<?php echo $row['id']; ?>" />
+                                                                <button type="submit" name="action" value="Approved" class="btn btn-success btn-sm">Approve</button>
+                                                                <button type="submit" name="action" value="Declined" class="btn btn-danger btn-sm">Decline</button>
+                                                                <input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
                                                             </form>
                                                         <?php } elseif ($row['status'] == 'Approved' || $row['status'] == 'Declined') { ?>
-                                                            <button type="submit" name="cert_action" value="remove" class="btn btn-warning btn-sm">Remove</button>
+                                                            <form method="POST" action="">
+                                                                <button type="submit" name="action" value="remove" class="btn btn-warning btn-sm">Remove</button>
+                                                                <input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+                                                            </form>
                                                         <?php } ?>
                                                     </td>
                                                 </tr>
                                         <?php
                                             }
                                         } else {
-                                            echo "<tr><td colspan='12'>No certificate applications found</td></tr>";
+                                            echo "<tr><td colspan='14'>No records found</td></tr>";
                                         }
                                         ?>
+    
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-
-
-
+    
+    
+    
+    
                         <!-- Modal for Approve/Decline with Message -->
                         <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="POST" action="notify.php">
+                                    <form method="POST" action="notify.php" id="notificationForm">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="statusModalLabel">Send Notification</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -303,18 +301,31 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                             </div>
                                             <div class="form-group">
                                                 <label for="message">Message to Applicant</label>
-                                                <textarea class="form-control" id="message" name="message" rows="4" placeholder="Enter your message..." required></textarea>
+                                                <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Enter your message..."></textarea>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Send Notification</button>
+                                            <button type="submit" class="btn btn-primary" id="sendNotificationButton">Send Notification</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-
+                        <script>
+                            document.getElementById('statusModal').addEventListener('hidden.bs.modal', function() {
+                                // Reset form when modal is closed
+                                document.getElementById('notificationForm').reset();
+                                document.getElementById('statusId').value = '';
+                                document.getElementById('statusAction').value = '';
+                            });
+                        </script>
+    
+    
+    
+    
+    
+    
                         <!-- Modal for image display -->
                         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
@@ -329,14 +340,14 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                 </div>
                             </div>
                         </div>
-
+    
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 var datatablesSimple = document.getElementById('datatablesSimple');
                                 if (datatablesSimple) {
                                     new simpleDatatables.DataTable(datatablesSimple);
                                 }
-
+    
                                 // Modal image display
                                 var imageModal = document.getElementById('imageModal');
                                 imageModal.addEventListener('show.bs.modal', function(event) {
@@ -347,12 +358,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
                                 });
                             });
                         </script>
-
-
-
-
-
-
+    
 
 
             </main>
@@ -373,8 +379,8 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
         </div>
     </div>
 
-    <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- Bootstrap Bundle JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/scripts.js"></script>
 
     <!-- Chart.js Scripts -->

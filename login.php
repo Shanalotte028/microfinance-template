@@ -1,16 +1,18 @@
 <?php
-session_start();
-require 'db.php';
 
+require 'db.php';
+session_start();
 // Redirect if user is already logged in
 if (!empty($_SESSION["id"])) {
     // Role-based redirection if already logged in
     if ($_SESSION["role"] == 1) {  // Admin
-        header("Location: index.php");
-    } elseif ($_SESSION["role"] == 0) {  // Regular User
+        header("Location: scholar_app.php");
+    } elseif ($_SESSION["role"] == 0) {  // Regular User (Applicants)
         header("Location: home.php");
     } elseif ($_SESSION["role"] == 3) {  // Instructor
         header("Location: instructor.php");
+    } elseif ($_SESSION["role"] == 2) {  // Employee
+        header("Location: employee.php");
     }
     exit();
 }
@@ -34,22 +36,28 @@ if (isset($_POST["submit"])) {
             $_SESSION["login"] = true;
             $_SESSION["id"] = $row["id"];
             $_SESSION["role"] = $row["role"]; // Fetch the role from the DB
-            
+            $_SESSION["user_name"] = $row["fName"]; // Fetch the user name
+
             // Role-based redirection
             if ($row["role"] == 1) {  // Admin role
                 echo "<script>
                 alert('You are logged in as Admin');
-                window.location.href = 'index.php'; // Redirect to Admin dashboard
+                window.location.href = 'scholar_app.php'; // Redirect to Admin dashboard
                 </script>";
-            } elseif ($row["role"] == 0) {  // Regular user role
+            } elseif ($row["role"] == 0) {  // Regular user (Applicant)
                 echo "<script>
-                alert('Welcome, User!');
-                window.location.href = 'home.php'; // Redirect to user home
+                alert('Welcome, Applicant!');
+                window.location.href = 'home.php'; // Redirect to applicant dashboard
                 </script>";
             } elseif ($row["role"] == 3) {  // Instructor role
                 echo "<script>
                 alert('Welcome, Instructor!');
                 window.location.href = 'instructor.php'; // Redirect to instructor page
+                </script>";
+            } elseif ($row["role"] == 2) {  // Employee
+                echo "<script>
+                alert('Welcome, Employee!');
+                window.location.href = 'employee.php'; // Redirect to employee page
                 </script>";
             }
             exit(); // Ensure no further code is executed
@@ -63,6 +71,8 @@ if (isset($_POST["submit"])) {
     }
 }
 ?>
+
+
 
 
 

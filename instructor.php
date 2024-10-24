@@ -1,15 +1,65 @@
 <?php
 session_start();
-require 'db.php';
+require 'db.php';  // Your database connection
 
-// Check if user is logged in and is an Instructor
-if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
-    header("Location: login.php");
+// Ensure the user is logged in and is an instructor
+if (!isset($_SESSION['id']) || $_SESSION['role'] != 3) {
+    echo "You are not authorized to view requests.";
+    exit();
+}
+
+$instructor_id = $_SESSION['id'];  // Get instructor ID from session
+
+// Fetch unread messages count
+$unread_query = "SELECT COUNT(*) as unread_count FROM feedback WHERE instructor_id = ? AND status = 'unread'";
+$stmt_unread = $conn->prepare($unread_query);
+$stmt_unread->bind_param("i", $instructor_id);
+$stmt_unread->execute();
+$result_unread = $stmt_unread->get_result();
+$unread_count = $result_unread->fetch_assoc()['unread_count'];
+$stmt_unread->close();
+
+// Fetch messages for the instructor
+$query = "
+    SELECT feedback.id, feedback.message, feedback.date_sent, users.fName, users.lName, feedback.status
+    FROM feedback
+    JOIN users ON feedback.employee_id = users.id
+    WHERE feedback.instructor_id = ? 
+    ORDER BY feedback.date_sent DESC";  // Show newest messages first
+$stmt = $conn->prepare($query);
+
+if ($stmt === false) {
+    die("Prepare failed: " . $conn->error);
+}
+
+$stmt->bind_param("i", $instructor_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Mark message as read when clicked
+if (isset($_GET['read_id'])) {
+    $message_id = $_GET['read_id'];
+    $update_query = "UPDATE feedback SET status = 'read' WHERE id = ?";
+    $update_stmt = $conn->prepare($update_query);
+    $update_stmt->bind_param("i", $message_id);
+    $update_stmt->execute();
+    $update_stmt->close();
+    header("Location: instructor.php");  // Refresh the page after marking as read
+    exit();
+}
+
+// Delete message
+if (isset($_GET['delete_id'])) {
+    $message_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM feedback WHERE id = ?";
+    $delete_stmt = $conn->prepare($delete_query);
+    $delete_stmt->bind_param("i", $message_id);
+    $delete_stmt->execute();
+    $delete_stmt->close();
+    header("Location: instructor.php");  // Refresh the page after deleting
     exit();
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +70,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Dashboard - SB Admin</title>
+    <title>Dashboard - Instructor</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -35,7 +85,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
         <!-- Navbar Search-->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <div class="input-group">
-
+                <span class="text-white">Unread Messages: <?= $unread_count ?></span>
             </div>
         </form>
         <!-- Navbar-->
@@ -43,7 +93,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="navbarDropdown">
-
                     <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
                 </ul>
             </li>
@@ -59,12 +108,10 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
-
-                       
-                <!-- <div class="sb-sidenav-footer bg-dark">
-                    <div class="small">Logged in as:</div>
-                    Start Bootstrap
-                </div> -->
+                        <div class="sb-sidenav-footer bg-dark">
+                            <div class="small">Logged in as:</div>
+                        </div>
+                    </div>
             </nav>
         </div>
         <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
@@ -74,47 +121,42 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item active">Dashboard</li>
                     </ol>
-                    <div class="row">
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-primary text-white mb-4">
-                                <div class="card-body">Primary Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-warning text-white mb-4">
-                                <div class="card-body">Warning Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-success text-white mb-4">
-                                <div class="card-body">Success Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-danger text-white mb-4">
-                                <div class="card-body">Danger Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="container">
+                        <h2 class="text-light mt-5">Requests</h2>
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Message</th>
+                                    <th>Date Sent</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        $status_display = $row['status'] == 'unread' ? "<strong>(Unread)</strong>" : "(Read)";
+                                        echo "<tr>
+                                                <td>{$row['fName']} {$row['lName']}</td>
+                                                <td>{$row['message']}</td>
+                                                <td>{$row['date_sent']}</td>
+                                                <td>$status_display</td>
+                                                <td>
+                                                    <a href='instructor.php?read_id={$row['id']}' class='btn btn-sm btn-success'>Mark as Read</a>
+                                                    <a href='instructor.php?delete_id={$row['id']}' class='btn btn-sm btn-danger'>Delete</a>
+                                                </td>
+                                              </tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='5'>No requests found.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                     </div>
-                   
-
-
+                </div>
             </main>
             <footer class="py-4 bg-light mt-auto bg-dark">
                 <div class="container-fluid px-4">
@@ -132,8 +174,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 3) {
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="js/scripts.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
 </body>
 
 </html>

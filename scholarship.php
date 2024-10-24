@@ -47,6 +47,7 @@ if (isset($_POST['submit'])) {
         $fName = mysqli_real_escape_string($conn, $_POST['fName']);
         $lName = mysqli_real_escape_string($conn, $_POST['lName']);
         $age = mysqli_real_escape_string($conn, $_POST['Age']);
+        $sex = mysqli_real_escape_string($conn, $_POST['sex']);
         $street = mysqli_real_escape_string($conn, $_POST['street']);
         $barangay = mysqli_real_escape_string($conn, $_POST['barangay']);
         $applicationType = mysqli_real_escape_string($conn, $_POST['application_type']);
@@ -73,8 +74,8 @@ if (isset($_POST['submit'])) {
         $birthc_folder = 'images-coe-birthc/' . $birthc_name;
 
         // Prepare the insert query with user_id and city_id
-        $insert_query = "INSERT INTO images_coe_birthc (user_id, fName, lName, Age, street, barangay, city_id, email, coe, birthc, application_type) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $insert_query = "INSERT INTO images_coe_birthc (user_id, fName, lName, Age, sex, street, barangay, city_id, email, coe, birthc, application_type) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt_insert = $conn->prepare($insert_query);
 
         if ($stmt_insert === false) {
@@ -83,7 +84,7 @@ if (isset($_POST['submit'])) {
         }
 
         // Bind the form values to the insert query, including user_id and city_id
-        $stmt_insert->bind_param('issississss', $id, $fName, $lName, $age, $street, $barangay, $city_id, $userEmail, $coe_name, $birthc_name, $applicationType);
+        $stmt_insert->bind_param('ississsissss', $id, $fName, $lName, $age, $sex, $street, $barangay, $city_id, $userEmail, $coe_name, $birthc_name, $applicationType);
 
         // Execute the insert query
         if ($stmt_insert->execute()) {
@@ -167,6 +168,15 @@ if (isset($_POST['submit'])) {
                     <div class="form-floating mb-3">
                       <input class="form-control" id="email" name="email" type="email" required placeholder="Enter your email" />
                       <label for="email">Email</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <select class="form-control" id="sex" name="sex" required>
+                        <option value="" disabled selected>Select your sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                      <label for="sex">Sex</label>
                     </div>
 
 

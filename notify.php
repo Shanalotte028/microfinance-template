@@ -1,9 +1,7 @@
 <?php
 session_start();
 require 'db.php';
-require 'mail.php'; // Make sure this is the correct file for the PHPMailer setup
-
-
+require 'mail.php'; // Ensure this is the correct file for PHPMailer setup
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ensure the ID is received
@@ -16,10 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = $_POST['message']; // Get the message from the form
     $action = $_POST['action']; // Approval or decline action
 
-    // Fetch the email from the `images_coe_birthc` table based on the provided ID
-    $query = "SELECT email FROM images_coe_birthc WHERE id = ?";
+    // Fetch the email from the `images_coe_birthc`, `hiring`, or `certificate` table
+    $query = "
+        SELECT email FROM images_coe_birthc WHERE id = ? 
+        UNION
+        SELECT email FROM hiring WHERE id = ?
+        UNION
+        SELECT email FROM certificate WHERE id = ?";
+    
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $id);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error); // Check for SQL preparation errors
+    }
+    $stmt->bind_param("iii", $id, $id, $id); // Bind the ID for all three tables
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -27,32 +34,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $result->fetch_assoc();
         $email = $row['email']; // Extract the email from the result
 
-        // Generate token and hash it
-        $token = bin2hex(random_bytes(16));
-        $token_hash = hash("sha256", $token);
-        $expiry = date("Y-m-d H:i:s", time() + 60 * 10); // 10-minute expiration
+        // Track if any table update succeeded
+        $update_successful = false;
 
-        // Update the reset_token and expiry in the database, as well as the message and status
-        $update_query = "UPDATE images_coe_birthc 
-                         SET reset_token_hash = ?, reset_token_expires_at = ?, 
-                             status = ?, message = ?, date_status_updated = NOW()
-                         WHERE id = ?";
-        $update_stmt = $conn->prepare($update_query);
-        $update_stmt->bind_param("ssssi", $token_hash, $expiry, $action, $message, $id);
-        $update_stmt->execute();
+        // Update the `images_coe_birthc` table
+        $update_query_images = "
+            UPDATE images_coe_birthc 
+            SET status = ?, message = ?, date_status_updated = NOW()
+            WHERE id = ?";
+        $update_stmt_images = $conn->prepare($update_query_images);
+        if (!$update_stmt_images) {
+            die("Prepare failed for images_coe_birthc: " . $conn->error);
+        }
+        $update_stmt_images->bind_param("ssi", $action, $message, $id);
+        $update_stmt_images->execute();
+        if ($update_stmt_images->affected_rows > 0) {
+            $update_successful = true;
+        }
 
-        if ($conn->affected_rows > 0) {
+        // Update the `hiring` table
+        $update_query_hiring = "
+            UPDATE hiring 
+            SET status = ?, message = ?, date_status_updated = NOW()
+            WHERE id = ?";
+        $update_stmt_hiring = $conn->prepare($update_query_hiring);
+        if (!$update_stmt_hiring) {
+            die("Prepare failed for hiring: " . $conn->error);
+        }
+        $update_stmt_hiring->bind_param("ssi", $action, $message, $id);
+        $update_stmt_hiring->execute();
+        if ($update_stmt_hiring->affected_rows > 0) {
+            $update_successful = true;
+        }
+
+        // Update the `certificate` table
+        $update_query_certificate = "
+            UPDATE certificate 
+            SET status = ?, message = ?, date_status_updated = NOW()
+            WHERE id = ?";
+        $update_stmt_certificate = $conn->prepare($update_query_certificate);
+        if (!$update_stmt_certificate) {
+            die("Prepare failed for certificate: " . $conn->error);
+        }
+        $update_stmt_certificate->bind_param("ssi", $action, $message, $id);
+        $update_stmt_certificate->execute();
+        if ($update_stmt_certificate->affected_rows > 0) {
+            $update_successful = true;
+        }
+
+        // Check if any updates were successful
+        if ($update_successful) {
             // Prepare the email
             $mail->setFrom("mfinance@email.com");
             $mail->addAddress($email);
             $mail->Subject = "Application Status Update";
-            $mail->isHTML(true);  // Make sure email content is HTML formatted
+            $mail->isHTML(true);  // Ensure email content is HTML formatted
             $mail->Body = <<<END
             Your application has been <strong>{$action}</strong>.<br><br>
 
             Message from the admin: <br><em>{$message}</em><br><br>
 
-            Click <a href="http://localhost/mfinance/view_notification.php?token=$token">here</a> to view the details.
+            Click <a href="http://localhost/mfinance/profile.php">here</a> to view the details.
             END;
 
             // Send the email
@@ -60,24 +102,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->send();
                 echo "<script>
                     alert('Message sent to the applicant\'s email.');
-                    window.location.href = 'index.php'; // Redirect to home page
+                    window.location.href = 'scholar_app.php'; // Redirect to home page
                 </script>";
             } catch (Exception $e) {
                 echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
             }
         } else {
-            echo "Failed to update the database or send the email.";
+            echo "Failed to update any table.";
         }
 
-        $update_stmt->close();
+        // Close all statements
+        $update_stmt_images->close();
+        $update_stmt_hiring->close();
+        $update_stmt_certificate->close();
     } else {
         echo "No email found for this ID.";
     }
 
+    // Close the main statement
     $stmt->close();
 } else {
     echo "Invalid request.";
 }
 ?>
-
-

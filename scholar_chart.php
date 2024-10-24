@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 require 'db.php'; // Ensure your database connection is successful
 
@@ -8,20 +7,87 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
     header("Location: login.php");
     exit();
 }
-// Fetch the ages from the database
-$query = "SELECT Age FROM images_coe_birthc";
+
+// Age Chart for Scholarship Applicants
+$query = "SELECT Age FROM images_coe_birthc"; // Fetch ages for scholarship applications
 $result = mysqli_query($conn, $query);
 
-// Check if the query executed successfully and has results
+$ages = [];
 if ($result) {
-    $ages = array();
     while ($row = mysqli_fetch_assoc($result)) {
         $ages[] = $row['Age'];
     }
 } else {
     die("Query failed: " . mysqli_error($conn));
 }
+
+// Bar Chart: Fetch city data for scholarship applicants
+$query = "SELECT c.city_name, COUNT(*) as total_applicants
+          FROM images_coe_birthc ic
+          JOIN cities c ON ic.city_id = c.city_id
+          GROUP BY c.city_name";
+
+$result = mysqli_query($conn, $query);
+
+$cities = [];
+$applicants = [];
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $cities[] = $row['city_name'];
+        $applicants[] = $row['total_applicants'];
+    }
+} else {
+    die("Query failed: " . mysqli_error($conn));
+}
+
+// Pass the bar chart data to JavaScript
+echo "<script>
+        var cityLabels = " . json_encode($cities) . ";
+        var applicantData = " . json_encode($applicants) . ";
+      </script>";
+
+// Pie Chart: Fetch status distribution for scholarship applicants (Approved and Declined)
+$status_data_query = "SELECT status, COUNT(*) as count FROM images_coe_birthc WHERE status IN ('Approved', 'Declined') GROUP BY status";
+$status_result = mysqli_query($conn, $status_data_query);
+
+$status_data = [];
+if ($status_result) {
+    while ($row = mysqli_fetch_assoc($status_result)) {
+        $status_data[$row['status']] = $row['count'];
+    }
+} else {
+    die("Query failed: " . mysqli_error($conn));
+}
+
+// Fetch count of 'Approved' and 'Declined' applications only
+$approved_count_query = "SELECT COUNT(*) AS count FROM images_coe_birthc WHERE status = 'Approved'";
+$declined_count_query = "SELECT COUNT(*) AS count FROM images_coe_birthc WHERE status = 'Declined'";
+
+$approved_result = mysqli_query($conn, $approved_count_query);
+$declined_result = mysqli_query($conn, $declined_count_query);
+
+// Fetch the counts
+$approved_count = mysqli_fetch_assoc($approved_result)['count'];
+$declined_count = mysqli_fetch_assoc($declined_result)['count'];
+
+
+// Fetch data for the table in the modal (only Approved and Declined)
+$applicants_query = "SELECT id, fName, lName, email, status FROM images_coe_birthc WHERE status IN ('Approved', 'Declined') ORDER BY status";
+$applicants_result = mysqli_query($conn, $applicants_query);
+$applicants_data = [];
+if ($applicants_result) {
+    while ($row = mysqli_fetch_assoc($applicants_result)) {
+        $applicants_data[] = $row;
+    }
+} else {
+    die("Query failed: " . mysqli_error($conn));
+}
+
+
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +99,7 @@ if ($result) {
     <meta name="description" content="" />
     <meta name="author" content="" />
     <title>Home Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <!-- <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" /> -->
     <link href="css/styles.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -63,38 +129,22 @@ if ($result) {
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="index.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                        </a>
-
-                        <a class="nav-link" href="scholar_app.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Scholarship applications
-                        </a>
-                        <a class="nav-link" href="job_app.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Job applications
-                        </a>
-                        <a class="nav-link" href="tesda_app.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Tesda applications
-                        </a>
+                
+                        
 
 
-                        <div class="sb-sidenav-menu-heading">  Charts </div>
+                        <div class="sb-sidenav-menu-heading"> Charts </div>
                         <a class="nav-link" href="scholar_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                           Scholarship Charts
+                            Scholarship Charts
                         </a>
                         <a class="nav-link" href="job_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                           Job Charts
+                            Job Charts
                         </a>
                         <a class="nav-link" href="tesda_chart.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                         Tesda Charts
+                            Tesda Charts
                         </a>
                         <a class="nav-link" href="tables.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
@@ -116,99 +166,230 @@ if ($result) {
                         <li class="breadcrumb-item"><a href="index.php" class="text-light">Dashboard</a></li>
                         <li class="breadcrumb-item active">Charts</li>
                     </ol>
-                   
-  <div class="row">
-                    <div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-chart-area me-1"></i>
-        Scholarship Applicants Age Chart
-    </div>
-
-    <canvas id="myAreaChart" width="60%" height="10"></canvas>
-
-    <script>
-        // Debugging output for ages
-        console.log(<?php echo json_encode($ages); ?>); // Check output in console
-
-        var ages = <?php echo json_encode($ages); ?>;
-
-        var ctx = document.getElementById("myAreaChart");
-        var myLineChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: Array.from({
-                    length: ages.length
-                }, (_, i) => `Applicant ${i + 1}`),
-                datasets: [{
-                    label: "Age",
-                    backgroundColor: "rgba(2,117,216,0.2)",
-                    borderColor: "rgba(2,117,216,1)",
-                    data: ages,
-                }],
-            },
-            options: {
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Applicants'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Age'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                            stepSize: 1, // Ensure the y-axis increments by 1
-                            callback: function(value) {
-                                if (value % 1 === 0) {
-                                    return value; // Display only whole numbers
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    </script>
-
-    <div class="card-body">
-        <canvas id="myAreaChart" width="60%" height="10"></canvas>
-    </div>
-</div>
 
 
-                    <!-- Bar and Pie Chart (Optional) -->
+                    <div class="row">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-area me-1"></i>
+                                Scholarship Applicants Age Chart
+                            </div>
+
+                            <canvas id="myAreaChart" width="60%" height="10"></canvas>
+
+                            <script>
+                                // Debugging output for ages
+                                console.log(<?php echo json_encode($ages); ?>); // Check output in console
+
+                                var ages = <?php echo json_encode($ages); ?>;
+
+                                var ctx = document.getElementById("myAreaChart");
+                                var myLineChart = new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: Array.from({
+                                            length: ages.length
+                                        }, (_, i) => `Applicant ${i + 1}`),
+                                        datasets: [{
+                                            label: "Age",
+                                            backgroundColor: "rgba(2,117,216,0.2)",
+                                            borderColor: "rgba(2,117,216,1)",
+                                            data: ages,
+                                        }],
+                                    },
+                                    options: {
+                                        scales: {
+                                            x: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Applicants'
+                                                }
+                                            },
+                                            y: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Age'
+                                                },
+                                                ticks: {
+                                                    beginAtZero: true,
+                                                    stepSize: 1, // Ensure the y-axis increments by 1
+                                                    callback: function(value) {
+                                                        if (value % 1 === 0) {
+                                                            return value; // Display only whole numbers
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            </script>
+
+                            <div class="card-body">
+                                <canvas id="myAreaChart" width="60%" height="10"></canvas>
+                            </div>
+                        </div>
+
+
+                        <!-- Bar  Chart  -->
                         <div class="col-lg-6">
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <i class="fas fa-chart-bar me-1"></i>
-                                    Bar Chart Example
+                                    Cities chart of Applicants
                                 </div>
                                 <div class="card-body"><canvas id="myBarChart" width="100%" height="50"></canvas></div>
-                                <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
                             </div>
                         </div>
+
+
+
+
+                        
+
+                        <!-- Pie Chart -->
                         <div class="col-lg-6">
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <i class="fas fa-chart-pie me-1"></i>
                                     Pie Chart Example
                                 </div>
-                                <div class="card-body"><canvas id="myPieChart" width="100%" height="50"></canvas></div>
-                                <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+                                <div class="card-body" style="height: 415px;">
+                                    <!-- Pie Chart -->
+                                    <canvas id="myPieChart" width="70%" height="400"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Modal Structure (Place it here, not inside the chart div) -->
+                            <div id="statusModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    <h2>Applicants Status</h2>
+                                    <table id="statusTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Email</th>
+                                                <th>Application</th>
+                                                <th>Status</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+    <!-- Fetch data from the database for the table -->
+    <?php
+    // Update the SQL query to include 'application_type'
+    $applicants_query = "SELECT id, fName, lName, email, application_type, status FROM images_coe_birthc WHERE status IN ('Approved', 'Declined') ORDER BY status";
+
+    $applicants_result = mysqli_query($conn, $applicants_query);
+    $applicants_data = [];
+
+    if (mysqli_num_rows($applicants_result) > 0) {
+        while ($row = mysqli_fetch_assoc($applicants_result)) {
+            echo "<tr>";
+            echo "<td>{$row['id']}</td>";
+            echo "<td>{$row['fName']}</td>";
+            echo "<td>{$row['lName']}</td>";
+            echo "<td>{$row['email']}</td>";
+            echo "<td>{$row['application_type']}</td>"; // Display application_type
+            echo "<td>{$row['status']}</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='6'>No data available</td></tr>";
+    }
+    ?>
+</tbody>
+
+                                    </table>
+                                    <button id="downloadBtn">Download as CSV</button>
+                                </div>
                             </div>
                         </div>
+
+                        <style>
+                            /* Modal styles for status*/
+                            .modal {
+                                display: none;
+                                position: fixed;
+                                z-index: 1;
+                                left: 0;
+                                top: 0;
+                                width: 100%;
+                                height: 100%;
+                                overflow: auto;
+                                background-color: rgba(0, 0, 0, 0.5);
+                            }
+
+                            .modal-content {
+                                background-color: rgb(175, 173, 173);
+                                margin: 10% auto;
+                                padding: 20px;
+                                border: 1px solid #5e5c5c;
+                                width: 50%;
+                                border-radius: 5px;
+                            }
+
+                            .close {
+                                color: #aaa;
+                                float: right;
+                                font-size: 50px;
+                                font-weight: bold;
+                            }
+
+                            .close:hover,
+                            .close:focus {
+                                color: black;
+                                text-decoration: none;
+                                cursor: pointer;
+                            }
+
+                            #statusTable {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+
+                            #statusTable th,
+                            #statusTable td {
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: left;
+                            }
+
+                            #statusTable th {
+                                background-color: #f2f2f2;
+                                font-weight: bold;
+                            }
+
+                            #downloadBtn {
+                                margin-top: 10px;
+                                padding: 10px 20px;
+                                background-color: #4CAF50;
+                                color: white;
+                                border: none;
+                                cursor: pointer;
+                                border-radius: 5px;
+                            }
+
+                            #downloadBtn:hover {
+                                background-color: #11da1b;
+                            }
+                        </style>
+
                     </div>
+
                 </div>
-            </main>
-        
         </div>
+        </main>
+
+    </div>
     </div>
 
-    <!-- Chart.js Rendering for the Area Chart -->
+
+
+    <!-- area chart -->
     <script>
         // Get the ages data from PHP
         var ages = <?php echo json_encode($ages); ?>;
@@ -271,12 +452,132 @@ if ($result) {
         });
     </script>
 
+    <!--  Bar Chart  -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById("myBarChart").getContext("2d");
+
+            var myBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: cityLabels, // City names from PHP
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: applicantData, // Applicant counts from PHP
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1, // Ensure each step is a whole number
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : null;
+                                } // Show only integers
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- Pie Chart -->
+    <script>
+    var approvedCount = <?php echo $approved_count; ?>;
+var declinedCount = <?php echo $declined_count; ?>;
+
+// Render the pie chart without the Pending status
+document.addEventListener("DOMContentLoaded", function() {
+    var ctx = document.getElementById("myPieChart").getContext("2d");
+
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Approved', 'Declined'], // Only Approved and Declined
+            datasets: [{
+                data: [approvedCount, declinedCount], // No Pending
+                backgroundColor: ['#36A2EB', '#FF6384'], // Colors for Approved and Declined
+                hoverBackgroundColor: ['#36A2EB', '#FF6384'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return tooltipItem.label + ': ' + tooltipItem.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+
+    // Modal handling
+    var pieChart = document.getElementById("myPieChart");
+    var modal = document.getElementById("statusModal");
+    var closeBtn = document.querySelector(".close");
+
+    pieChart.onclick = function() {
+        modal.style.display = "block";
+    };
+
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    // Download CSV functionality
+    var downloadBtn = document.getElementById("downloadBtn");
+    downloadBtn.onclick = function() {
+        downloadCSV();
+    };
+
+    function downloadCSV() {
+        var table = document.getElementById("statusTable");
+        var rows = Array.from(table.querySelectorAll("tr"));
+        var csvContent = "";
+
+        rows.forEach(function(row) {
+            var cols = Array.from(row.querySelectorAll("td, th"));
+            var data = cols.map(function(col) {
+                return col.innerText;
+            }).join(",");
+            csvContent += data + "\n";
+        });
+
+        var blob = new Blob([csvContent], { type: 'text/csv' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'applicants_status.csv';
+        link.click();
+    }
+
+    </script>
+
+
     <!-- Bootstrap Bundle and Other Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="js/scripts.js"></script>
-       
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="assets/demo/chart-bar-demo.js"></script>
     <script src="assets/demo/chart-pie-demo.js"></script>
+
 </body>
 
 </html>

@@ -1,17 +1,12 @@
 <?php
-
 session_start();
-require 'db.php'; // Ensure your database connection is successful
+require 'db.php'; // Include database connection
 
-// Check if user is logged in and is an admin
-if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
+// Check if user is logged in and is an Employee
+if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
     header("Location: login.php");
     exit();
 }
-
-
-
-
 ?>
 
 
@@ -39,17 +34,17 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
 </head>
 
 <body class="sb-nav-fixed">
-    <!-- Top Navigation Bar -->
+    <!-- Top Navbar -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand ps-3" href="index.php">Microfinance</a>
-        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-        <ul class="navbar-nav ms-auto">
+        <a class="navbar-brand ps-3" href="employee.php">Profile Dashboard</a>
+        <ul class="navbar-nav ms-auto me-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user fa-fw"></i>
+                    
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item text-muted" href="logout.php">Logout</a></li>
+                    <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                    <li><a class="dropdown-item text-muted" href="employee.php">Profile</a></li>
                 </ul>
             </li>
         </ul>
@@ -61,42 +56,35 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Core</div>
-                        <!-- <a class="nav-link" href="index.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                            <li></li>
-                        </a> -->
-                        <a class="nav-link" href="scholar_app.php">
+                        <div class="sb-sidenav-menu-heading">Interface</div>
+                        
+                        <a class="nav-link" href="employee_scholar.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Scholarship applications
                         </a>
-                        <a class="nav-link" href="job_app.php">
+                        <a class="nav-link" href="employee_job.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Job applications
                         </a>
-                        <a class="nav-link" href="tesda_app.php">
+                        <a class="nav-link" href="employee_tesda.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Tesda applications
                         </a>
 
-                        <div class="sb-sidenav-menu-heading">Charts</div>
-                        <a class="nav-link" href="scholar_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Scholarship Charts
-                        </a>
-                        <a class="nav-link" href="job_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Job Charts
-                        </a>
-                        <a class="nav-link" href="tesda_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Tesda Charts
-                        </a>
-                        <a class="nav-link" href="tables.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
-                        </a>
+                        <div class="sb-sidenav-menu-heading">Notification</div>
+                    <!-- Messages -->
+                    <a class="nav-link" href="messages.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
+                        Messages
+                    </a>
+
+                    <!-- Requests -->
+                    <a class="nav-link" href="requests.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
+                        Requests
+                    </a>
+
+                       
                     </div>
                 </div>
                 <div class="sb-sidenav-footer bg-dark">
