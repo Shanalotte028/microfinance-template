@@ -133,7 +133,7 @@ $stmt_certificate->close();
 <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-info-circle me-1"></i>
-                    Images COE/Birth Certificate Application Details
+                    Scholarship Status
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered">
@@ -161,7 +161,7 @@ $stmt_certificate->close();
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-briefcase me-1"></i>
-                    Hiring Application Details
+                    Hiring Application Status
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered">
@@ -189,8 +189,7 @@ $stmt_certificate->close();
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-certificate me-1"></i>
-                    Certificate Application Details
-                </div>
+                    Certificate Application Status
                 <div class="card-body">
                     <table class="table table-bordered">
                         <thead>
@@ -238,15 +237,7 @@ $stmt_certificate->close();
                         </div>
                         <div class="modal-body">
                             <form action="" method="POST" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Name</label>
-                                    <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($profile_data['fName']); ?>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($profile_data['email']); ?>" required>
-                                </div>
-                                <div class="mb-3">
+                               
                                     <label for="profile_pic" class="form-label">Profile Picture</label>
                                     <input type="file" class="form-control-file" id="profile_pic" name="profile_pic">
                                 </div>

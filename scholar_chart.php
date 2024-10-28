@@ -1,3 +1,6 @@
+
+
+
 <?php
 session_start();
 require 'db.php'; // Ensure your database connection is successful
@@ -6,6 +9,24 @@ require 'db.php'; // Ensure your database connection is successful
 if (!isset($_SESSION["id"]) || $_SESSION["role"] != 1) {
     header("Location: login.php");
     exit();
+}
+
+// Ensure that fName and lName are stored in the session (adjust this if necessary)
+if (!isset($_SESSION['fName']) || !isset($_SESSION['lName'])) {
+    // Assuming you have a users table, fetch the user's fName and lName
+    $user_id = $_SESSION['id'];
+    $user_query = "SELECT fName, lName FROM users WHERE id = ?";
+    $stmt = $conn->prepare($user_query);
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $_SESSION['fName'] = $user['fName'];
+        $_SESSION['lName'] = $user['lName'];
+    }
+    $stmt->close();
 }
 
 // Age Chart for Scholarship Applicants
@@ -70,7 +91,6 @@ $declined_result = mysqli_query($conn, $declined_count_query);
 $approved_count = mysqli_fetch_assoc($approved_result)['count'];
 $declined_count = mysqli_fetch_assoc($declined_result)['count'];
 
-
 // Fetch data for the table in the modal (only Approved and Declined)
 $applicants_query = "SELECT id, fName, lName, email, status FROM images_coe_birthc WHERE status IN ('Approved', 'Declined') ORDER BY status";
 $applicants_result = mysqli_query($conn, $applicants_query);
@@ -83,8 +103,8 @@ if ($applicants_result) {
     die("Query failed: " . mysqli_error($conn));
 }
 
-
 ?>
+
 
 
 
@@ -125,39 +145,33 @@ if ($applicants_result) {
         </ul>
     </nav>
     <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
-                    <div class="nav">
-                
-                        
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">Charts</div>
+                    <a class="nav-link" href="scholar_chart.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        Scholarship Charts
+                    </a>
+                    <a class="nav-link" href="job_chart.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        Job Charts
+                    </a>
+                    <a class="nav-link" href="tesda_chart.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        Tesda Charts
+                    </a>
+                </div>
+            </div>
+            <div class="sb-sidenav-footer bg-dark">
+                <div class="small">Logged in as:</div>
+                <?php echo $_SESSION['fName'] . ' ' . $_SESSION['lName']; ?>
+            </div>
+        </nav>
+    </div>
 
 
-                        <div class="sb-sidenav-menu-heading"> Charts </div>
-                        <a class="nav-link" href="scholar_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Scholarship Charts
-                        </a>
-                        <a class="nav-link" href="job_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Job Charts
-                        </a>
-                        <a class="nav-link" href="tesda_chart.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Tesda Charts
-                        </a>
-                        <a class="nav-link" href="tables.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
-                        </a>
-                    </div>
-                </div>
-                <div class="sb-sidenav-footer bg-dark">
-                    <div class="small">Logged in as:</div>
-                    Start Bootstrap
-                </div>
-            </nav>
-        </div>
         <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
             <main>
                 <div class="container-fluid px-4">

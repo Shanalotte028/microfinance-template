@@ -7,6 +7,8 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
     header("Location: login.php");
     exit();
 }
+
+
 ?>
 
 
@@ -30,13 +32,13 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
 </head>
 
 <body class="sb-nav-fixed">
-     <!-- Top Navbar -->
-     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Top Navbar -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand ps-3" href="employee.php">Profile Dashboard</a>
         <ul class="navbar-nav ms-auto me-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    
+
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="logout.php">Logout</a></li>
@@ -55,7 +57,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Interface</div>
-                       
+
 
                         <a class="nav-link" href="employee_scholar.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
@@ -69,20 +71,20 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Tesda applications
                         </a>
-                        
-                        <div class="sb-sidenav-menu-heading">Notification</div>
-                    <!-- Messages -->
-                    <a class="nav-link" href="messages.php">
-                        <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
-                        Messages
-                    </a>
 
-                    <!-- Requests -->
-                    <a class="nav-link" href="requests.php">
-                        <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                        Requests
-                    </a>
-                       
+                        <div class="sb-sidenav-menu-heading">Notification</div>
+                        <!-- Messages -->
+                        <a class="nav-link" href="messages.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
+                            Messages
+                        </a>
+
+                        <!-- Requests -->
+                        <a class="nav-link" href="requests.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
+                            Requests
+                        </a>
+
                     </div>
                 </div>
                 <div class="sb-sidenav-footer bg-dark">
@@ -269,7 +271,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
 
 
 
-
                     <!-- Modal for Approve/Decline with Message -->
                     <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -310,6 +311,70 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
 
 
 
+                    <!-- for dowloading table -->
+                    <div class="card-body table-responsive">
+                        <!-- Download All Button -->
+                        <button id="downloadAllBtn" class="btn btn-success mb-3">Download All Approved Applications</button>
+
+                        <table id="approvedApplicationsTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Age</th>
+                                    <th>Sex</th>
+                                    <th>Email</th>
+                                    <th>Street</th>
+                                    <th>Status</th>
+                                    <th>Date Uploaded</th>
+                                    <th>Date Status Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                // Query to fetch approved applications only
+                                $query = "SELECT id, fName, lName, Age, sex, email, city, status, date_uploaded, date_status_updated
+                      FROM images_coe_birthc 
+                      WHERE status = 'Approved'";
+                                $result = mysqli_query($conn, $query);
+
+                                if (!$result) {
+                                    die('Query failed: ' . mysqli_error($conn));
+                                }
+
+                                if (mysqli_num_rows($result) > 0) {
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($row['id']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['fName']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['lName']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['Age']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['sex']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['city']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['date_uploaded']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['date_status_updated']); ?></td>
+                                        </tr>
+                                <?php
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='10'>No approved applications found.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <script>
+                        document.getElementById('downloadAllBtn').addEventListener('click', function() {
+                            window.location.href = 'download_application.php'; // Redirect to download the Excel or Word file
+                        });
+                    </script>
+
+
 
 
 
@@ -345,13 +410,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["role"] != 2) {
                             });
                         });
                     </script>
-
-
-
-
-
-
-
 
             </main>
 

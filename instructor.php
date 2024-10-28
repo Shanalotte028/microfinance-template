@@ -10,6 +10,21 @@ if (!isset($_SESSION['id']) || $_SESSION['role'] != 3) {
 
 $instructor_id = $_SESSION['id'];  // Get instructor ID from session
 
+// Fetch the instructor's first and last name
+$name_query = "SELECT fName, lName FROM users WHERE id = ?";
+$stmt_name = $conn->prepare($name_query);
+$stmt_name->bind_param("i", $instructor_id);
+$stmt_name->execute();
+$result_name = $stmt_name->get_result();
+
+if ($result_name->num_rows > 0) {
+    $instructor = $result_name->fetch_assoc();
+    $instructor_name = $instructor['fName'] . ' ' . $instructor['lName'];  // Concatenate first and last name
+} else {
+    $instructor_name = 'Unknown';  // Fallback in case the instructor is not found
+}
+$stmt_name->close();
+
 // Fetch unread messages count
 $unread_query = "SELECT COUNT(*) as unread_count FROM feedback WHERE instructor_id = ? AND status = 'unread'";
 $stmt_unread = $conn->prepare($unread_query);
@@ -61,6 +76,7 @@ if (isset($_GET['delete_id'])) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -99,21 +115,27 @@ if (isset($_GET['delete_id'])) {
         </ul>
     </nav>
     <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
-                    <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="index.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                        </a>
-                        <div class="sb-sidenav-footer bg-dark">
-                            <div class="small">Logged in as:</div>
-                        </div>
-                    </div>
-            </nav>
-        </div>
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">Core</div>
+                    <a class="nav-link" href="index.php">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <!-- Add more menu items here as needed -->
+                </div>
+            </div>
+            <div class="sb-sidenav-footer bg-dark">
+                <div class="small">Logged in as:</div>
+                <!-- Display the instructor's name here -->
+                <strong><?php echo htmlspecialchars($instructor_name); ?></strong>
+            </div>
+        </nav>
+    </div>
+
+
         <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
             <main>
                 <div class="container-fluid px-4">

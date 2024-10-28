@@ -54,8 +54,8 @@ if (isset($_POST['submit'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="css/styles.css" rel="stylesheet">
 </head>
+
 <body class="sb-nav-fixed bg-light">
-    <!-- Top Navbar -->
     <!-- Top Navbar -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand ps-3" href="employee.php">Profile Dashboard</a>
@@ -73,15 +73,14 @@ if (isset($_POST['submit'])) {
     </nav>
 
     <!-- Side Navigation -->
-<div id="layoutSidenav">
-    <div id="layoutSidenav_nav">
-        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-            <div class="sb-sidenav-menu">
-                <div class="nav">
-                    <div class="sb-sidenav-menu-heading">Interface</div>
-                    
-                    
-                    <a class="nav-link" href="employee_tesda.php">
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Interface</div>
+
+                        <a class="nav-link" href="employee_tesda.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Scholarship applications
                         </a>
@@ -95,74 +94,95 @@ if (isset($_POST['submit'])) {
                         </a>
 
                         <div class="sb-sidenav-menu-heading">Notification</div>
-                    <!-- Messages -->
-                    <a class="nav-link" href="messages.php">
-                        <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
-                        Messages
-                    </a>
+                        <!-- Messages -->
+                        <a class="nav-link" href="messages.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
+                            Messages
+                        </a>
 
-                    <!-- Requests -->
-                    <a class="nav-link" href="requests.php">
-                        <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                        Requests
-                    </a>
+                        <!-- Requests -->
+                        <a class="nav-link" href="requests.php">
+                            <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
+                            Requests
+                        </a>
 
-                   
-
-                    
-                </div>
-            </div>
-        </nav>
-    </div>
-    
-    <!-- Main Content -->
-    <div id="layoutSidenav_content">
-        <main>
-            <div class="container-fluid px-4">
-                <h1 class="mt-4">Profile Details</h1>
-                <ol class="breadcrumb mb-4">
-                    <li class="breadcrumb-item active">Profile</li>
-                </ol>
-
-                <!-- Profile Display Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-user-circle me-1"></i> Your Profile
                     </div>
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#viewProfilePicModal">
-                                <img src="uploads/profile_pics/<?php echo htmlspecialchars($profile_data['profile_pic']); ?>" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px;">
-                            </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Profile Details</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">Profile</li>
+                    </ol>
+
+                    <!-- Profile Display Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-user-circle me-1"></i> Your Profile
                         </div>
-                        <h5 class="card-title"><?php echo htmlspecialchars($profile_data['fName']) . ' ' . htmlspecialchars($profile_data['lName']); ?></h5>
-                        <p class="card-text"><?php echo htmlspecialchars($profile_data['email']); ?></p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile Picture</button>
-                    </div>
-                </div>
-                
-                <!-- Modal for Viewing Larger Profile Picture -->
-                <div class="modal fade" id="viewProfilePicModal" tabindex="-1" aria-labelledby="viewProfilePicModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="viewProfilePicModalLabel">Your Profile Picture</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#viewProfilePicModal">
+                                    <img src="uploads/profile_pics/<?php echo htmlspecialchars($profile_data['profile_pic']); ?>" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px;">
+                                </a>
                             </div>
-                            <div class="modal-body text-center">
-                                <img src="uploads/profile_pics/<?php echo htmlspecialchars($profile_data['profile_pic']); ?>" alt="Profile Picture" class="img-fluid">
-                            </div>
+                            <h5 class="card-title"><?php echo htmlspecialchars($profile_data['fName']) . ' ' . htmlspecialchars($profile_data['lName']); ?></h5>
+                            <p class="card-text"><?php echo htmlspecialchars($profile_data['email']); ?></p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile Picture</button>
                         </div>
                     </div>
-                </div>
-            </div>
-        </main>
-    </div>
-</div>
 
-<!-- Bootstrap Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="js/scripts.js"></script>
+                    <!-- Modal for Editing Profile Picture -->
+                    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile Picture</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" enctype="multipart/form-data">
+                                        <div class="form-group mb-3">
+                                            <label for="profile_pic">Select New Profile Picture</label>
+                                            <input type="file" class="form-control" id="profile_pic" name="profile_pic" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-primary" name="submit">Update Profile Picture</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Viewing Larger Profile Picture -->
+                    <div class="modal fade" id="viewProfilePicModal" tabindex="-1" aria-labelledby="viewProfilePicModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewProfilePicModalLabel">Your Profile Picture</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img src="uploads/profile_pics/<?php echo htmlspecialchars($profile_data['profile_pic']); ?>" alt="Profile Picture" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
 
 </body>
+
 </html>

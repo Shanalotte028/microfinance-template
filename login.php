@@ -6,7 +6,7 @@ session_start();
 if (!empty($_SESSION["id"])) {
     // Role-based redirection if already logged in
     if ($_SESSION["role"] == 1) {  // Admin
-        header("Location: scholar_app.php");
+        header("Location: scholar_chart.php");
     } elseif ($_SESSION["role"] == 0) {  // Regular User (Applicants)
         header("Location: home.php");
     } elseif ($_SESSION["role"] == 3) {  // Instructor
@@ -42,7 +42,7 @@ if (isset($_POST["submit"])) {
             if ($row["role"] == 1) {  // Admin role
                 echo "<script>
                 alert('You are logged in as Admin');
-                window.location.href = 'scholar_app.php'; // Redirect to Admin dashboard
+                window.location.href = 'scholar_chart.php'; // Redirect to Admin dashboard
                 </script>";
             } elseif ($row["role"] == 0) {  // Regular user (Applicant)
                 echo "<script>

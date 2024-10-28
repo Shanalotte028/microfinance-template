@@ -145,16 +145,9 @@ if ($applicants_result) {
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Tesda Charts
                         </a>
-                        <a class="nav-link" href="tables.php">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
-                        </a>
                     </div>
                 </div>
-                <div class="sb-sidenav-footer bg-dark">
-                    <div class="small">Logged in as:</div>
-                    Start Bootstrap
-                </div>
+                
             </nav>
         </div>
         <div id="layoutSidenav_content" class="bg-dark" style="--bs-bg-opacity: .95;">
