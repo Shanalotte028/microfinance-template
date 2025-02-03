@@ -11,6 +11,25 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
  
+ @import '@/assets/vendor/bootstrap-icons/bootstrap-icons.css';
+
+/* Custom CSS to adjust the label position for file input */
+.custom-file-label {
+  margin-top: -5px;
+  padding-left: 5px;
+}
+
+.larger-icon {
+  font-size: 2rem; /* Adjust the size as needed */
+}
+
+.sticky-button-container {
+  position: sticky;
+  right: 0;
+  z-index: 1; /* Ensure the button stays above the table */
+  padding-right: 1rem; /* Add some padding to the right */
+}
+
 :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
@@ -1996,11 +2015,12 @@ progress {
 .form-text {
   margin-top: 0.25rem;
   font-size: 0.875em;
-  color: #6c757d;
+  color: #212529;
 }
 
+/* Default styles for .form-control and .datatable-input */
 .form-control, .datatable-input {
-  display: block;
+ /*  display: block; */
   width: 100%;
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
@@ -2011,11 +2031,23 @@ progress {
   background-clip: padding-box;
   border: 1px solid #ced4da;
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border-radius: 0.375rem;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+/* Media query for smaller screens (max-width: 576px) */
+@media (max-width: 576px) {
+  .form-control, .datatable-input {
+    margin-top: 10px;
+    font-size: 0.8rem;   /* Smaller font size */
+    padding: 0.5rem 0.5rem; /* Reduced padding */
+    border-radius: 0.7rem; /* Smaller border radius */
+  }
+}
+
+/* No transition when reduced motion is enabled */
 @media (prefers-reduced-motion: reduce) {
   .form-control, .datatable-input {
     transition: none;
@@ -2061,7 +2093,7 @@ progress {
   border-style: solid;
   border-width: 0;
   border-inline-end-width: 1px;
-  border-radius: 0;
+  border-radius: 30px;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2449,6 +2481,7 @@ textarea.form-control-lg {
   border: 1px solid transparent;
   transform-origin: 0 0;
   transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+  color: #212529;
 }
 @media (prefers-reduced-motion: reduce) {
   .form-floating > label {
@@ -3256,15 +3289,15 @@ textarea.form-control-lg {
   --bs-dropdown-divider-bg: var(--bs-border-color-translucent);
   --bs-dropdown-divider-margin-y: 0.5rem;
   --bs-dropdown-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --bs-dropdown-link-color: #212529;
-  --bs-dropdown-link-hover-color: #1e2125;
-  --bs-dropdown-link-hover-bg: #e9ecef;
+  --bs-dropdown-link-color: #ffffff;
+  --bs-dropdown-link-hover-color: #ffffff;
+  --bs-dropdown-link-hover-bg: rgb(22, 25, 27);
   --bs-dropdown-link-active-color: #fff;
   --bs-dropdown-link-active-bg: #0d6efd;
   --bs-dropdown-link-disabled-color: #adb5bd;
   --bs-dropdown-item-padding-x: 1rem;
   --bs-dropdown-item-padding-y: 0.25rem;
-  --bs-dropdown-header-color: #6c757d;
+  --bs-dropdown-header-color: white;
   --bs-dropdown-header-padding-x: 1rem;
   --bs-dropdown-header-padding-y: 0.5rem;
   position: absolute;
@@ -4226,10 +4259,16 @@ textarea.form-control-lg {
   border-top: 0;
 }
 
+
 .card-body {
+  position: relative;
   flex: 1 1 auto;
   padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
   color: var(--bs-card-color);
+
+  /* Allow scrollbars when content overflows */
+  overflow: auto;  /* Add scrollbars when needed */
+  max-width: 100%;  /* Ensure content doesn't overflow horizontally */
 }
 
 .card-title {
@@ -4523,12 +4562,20 @@ textarea.form-control-lg {
   color: var(--bs-breadcrumb-item-active-color);
 }
 
+.pagination-container {
+  display: flex;
+  justify-content: center; /* Center the pagination */
+  flex-wrap: wrap; /* Allow wrapping inside the container */
+  max-width: 100%; /* Prevent horizontal overflow */
+  overflow: hidden; /* Hide overflow if content overflows */
+}
+
 .pagination, .datatable-pagination ul {
   --bs-pagination-padding-x: 0.75rem;
   --bs-pagination-padding-y: 0.375rem;
   --bs-pagination-font-size: 1rem;
   --bs-pagination-color: #9FA6B2;
-  --bs-pagination-bg: black;
+  --bs-pagination-bg: rgb(14, 15, 17);
   --bs-pagination-border-width: 1px;
   --bs-pagination-border-color: black;
   --bs-pagination-border-radius: 0.375rem;
@@ -4544,10 +4591,18 @@ textarea.form-control-lg {
   --bs-pagination-disabled-color: #6c757d;
   --bs-pagination-disabled-bg: #fff;
   --bs-pagination-disabled-border-color: #dee2e6;
-  display: flex;
+  flex-wrap: wrap; /* Enable wrapping for pagination items */
   padding-left: 0;
   list-style: none;
   cursor: pointer;
+  display: flex;
+  margin: 10px;
+}
+
+.page-item {
+  flex: 1 1 auto; /* Allow items to shrink or grow */
+  text-align: center; /* Center-align text */
+  min-width: 50px; /* Avoid items becoming too small */
 }
 
 .page-link, .datatable-pagination a {
@@ -4561,17 +4616,20 @@ textarea.form-control-lg {
   border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
 @media (prefers-reduced-motion: reduce) {
   .page-link, .datatable-pagination a {
     transition: none;
   }
 }
+
 .page-link:hover, .datatable-pagination a:hover {
   z-index: 2;
   color: var(--bs-pagination-hover-color);
   background-color: var(--bs-pagination-hover-bg);
   border-color: var(--bs-pagination-hover-border-color);
 }
+
 .page-link:focus, .datatable-pagination a:focus {
   z-index: 3;
   color: var(--bs-pagination-focus-color);
@@ -4579,12 +4637,14 @@ textarea.form-control-lg {
   outline: 0;
   box-shadow: var(--bs-pagination-focus-box-shadow);
 }
+
 .page-link.active, .datatable-pagination a.active, .active > .page-link, .datatable-pagination .active > a {
   z-index: 3;
   color: var(--bs-pagination-active-color);
   background-color: var(--bs-pagination-active-bg);
   border-color: var(--bs-pagination-active-border-color);
 }
+
 .page-link.disabled, .datatable-pagination a.disabled, .disabled > .page-link, .datatable-pagination .disabled > a {
   color: var(--bs-pagination-disabled-color);
   pointer-events: none;
@@ -4595,10 +4655,12 @@ textarea.form-control-lg {
 .page-item:not(:first-child) .page-link, .page-item:not(:first-child) .datatable-pagination a, .datatable-pagination .page-item:not(:first-child) a, .datatable-pagination li:not(:first-child) .page-link, .datatable-pagination li:not(:first-child) a {
   margin-left: -1px;
 }
+
 .page-item:first-child .page-link, .page-item:first-child .datatable-pagination a, .datatable-pagination .page-item:first-child a, .datatable-pagination li:first-child .page-link, .datatable-pagination li:first-child a {
   border-top-left-radius: var(--bs-pagination-border-radius);
   border-bottom-left-radius: var(--bs-pagination-border-radius);
 }
+
 .page-item:last-child .page-link, .page-item:last-child .datatable-pagination a, .datatable-pagination .page-item:last-child a, .datatable-pagination li:last-child .page-link, .datatable-pagination li:last-child a {
   border-top-right-radius: var(--bs-pagination-border-radius);
   border-bottom-right-radius: var(--bs-pagination-border-radius);
@@ -4617,6 +4679,10 @@ textarea.form-control-lg {
   --bs-pagination-font-size: 0.875rem;
   --bs-pagination-border-radius: 0.25rem;
 }
+
+
+
+
 
 .badge {
   --bs-badge-padding-x: 0.65em;
@@ -8191,6 +8257,11 @@ textarea.form-control-lg {
   background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
 }
 
+.bg-dark-low{
+  --bs-bg-opacity: .95;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+}
+
 .bg-black {
   --bs-bg-opacity: 1;
   background-color: rgba(var(--bs-black-rgb), var(--bs-bg-opacity)) !important;
@@ -10976,7 +11047,7 @@ body {
   margin: 0;
 }
 .sb-topnav.navbar-dark #sidebarToggle {
-  color: rgba(255, 255, 255, 0.5);
+  color: white;
 }
 .sb-topnav.navbar-light #sidebarToggle {
   color: #212529;
@@ -11033,16 +11104,16 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.6);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-sidenav-collapse-arrow {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.6);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link:hover {
   color: #fff;
@@ -11129,8 +11200,7 @@ body {
   background-color: #212529;
   border-color: #6c757d;
   color: #f8f9fa;
-  cursor:pointer;
-  
+  cursor: pointer;
 }
 
 .datatable-info {
